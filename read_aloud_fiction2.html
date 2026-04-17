@@ -417,13 +417,7 @@ async function analyzeRecording(sid,text,origBlob){
     if(!resp.ok){var et=await resp.text(); throw new Error("STT "+resp.status+": "+et.slice(0,120));}
     var result=await resp.json();
     console.log("STT:",result.RecognitionStatus,"|",result.DisplayText);
-    console.log("Full STT result:", JSON.stringify(result).slice(0,800));
-    // Check what paths exist
-    if(result.NBest && result.NBest[0]) {
-      var nb = result.NBest[0];
-      console.log("NBest[0] keys:", Object.keys(nb).join(", "));
-      if(nb.PronunciationAssessment) console.log("PA keys:", Object.keys(nb.PronunciationAssessment).join(", "));
-    }
+
     // Download button
     var dlBtn=document.getElementById("dlbtn-"+sid);
     if(dlBtn){
@@ -449,36 +443,29 @@ function scColor(v){return v>=80?"#06d6a0":v>=60?"#ffd166":"#ef476f";}
 function showScore(sid,text,result){
   var panel=document.getElementById("panel-"+sid);
   var status=result.RecognitionStatus||"Unknown";
-  // Azure Pronunciation Assessment can be at different paths depending on API version
+  // Azure REST API returns scores DIRECTLY on NBest[0], not nested under PronunciationAssessment
+  // NBest[0].AccuracyScore, FluencyScore, CompletenessScore, ProsodyScore, PronScore
+  var nb0 = result.NBest && result.NBest[0];
   var pa = null;
-  if(result.NBest && result.NBest[0]) {
-    pa = result.NBest[0].PronunciationAssessment
-      || result.NBest[0].pronunciationAssessment
-      || null;
-    // Also check if it's directly on the Words level aggregate
-    if(!pa && result.NBest[0].Words && result.NBest[0].Words.length) {
-      // Try to reconstruct from word-level scores
-      var words2 = result.NBest[0].Words;
-      var accs = words2.filter(function(w){return w.PronunciationAssessment;})
-                       .map(function(w){return w.PronunciationAssessment.AccuracyScore||0;});
-      if(accs.length) {
-        var avgAcc = Math.round(accs.reduce(function(a,b){return a+b;},0)/accs.length);
-        pa = {AccuracyScore:avgAcc, FluencyScore:avgAcc, CompletenessScore:100, ProsodyScore:avgAcc};
-        console.log("Reconstructed PA from word scores:", pa);
-      }
+  if(nb0) {
+    if(nb0.PronunciationAssessment) {
+      // SDK-style nested (fallback)
+      pa = nb0.PronunciationAssessment;
+    } else if(nb0.AccuracyScore !== undefined) {
+      // REST API style: scores directly on NBest[0]
+      pa = {
+        AccuracyScore:     nb0.AccuracyScore,
+        FluencyScore:      nb0.FluencyScore,
+        CompletenessScore: nb0.CompletenessScore,
+        ProsodyScore:      nb0.ProsodyScore || nb0.PronScore
+      };
     }
   }
   if(!pa){
     var hint="&#9888; ";
-    if(status==="Success" && result.DisplayText) {
-      hint+="已识别到语音但评分数据未返回。识别内容：" + result.DisplayText;
-    } else if(status==="NoMatch"||status==="Success") {
-      hint+="未检测到语音。请靠近麦克风，大声清晰朗读后再试。";
-    } else if(status==="InitialSilenceTimeout") {
-      hint+="点击录音后请立即说话。";
-    } else {
-      hint+="状态: "+status+(result.DisplayText?" | "+result.DisplayText:"");
-    }
+    if(status==="NoMatch") hint+="未检测到语音。请靠近麦克风，大声清晰朗读后再试。";
+    else if(status==="InitialSilenceTimeout") hint+="点击录音后请立即说话。";
+    else hint+="状态: "+status+(result.DisplayText?" | 已识别："+result.DisplayText:"");
     panel.innerHTML="<div style='color:var(--text-muted);font-size:.82rem;'>"+hint+"</div>";
     panel.classList.add("visible"); return;
   }
@@ -492,8 +479,9 @@ function showScore(sid,text,result){
   var words=result.NBest[0].Words||[];
   var whtml=""; var issues=[];
   words.forEach(function(w){
-    var wa=Math.round((w.PronunciationAssessment&&w.PronunciationAssessment.AccuracyScore)||100);
-    var et=(w.PronunciationAssessment&&w.PronunciationAssessment.ErrorType)||"None";
+    // REST API: scores directly on Word object
+    var wa=Math.round(w.AccuracyScore||(w.PronunciationAssessment&&w.PronunciationAssessment.AccuracyScore)||100);
+    var et=w.ErrorType||(w.PronunciationAssessment&&w.PronunciationAssessment.ErrorType)||"None";
     if(et==="Omission"){whtml+="<span class='wc werr'>&#10007; "+w.Word+"</span>";issues.push("「"+w.Word+"」漏读");}
     else if(et==="Insertion"){whtml+="<span class='wc wwarn'>+"+w.Word+"</span>";}
     else if(wa<60){whtml+="<span class='wc werr'>"+w.Word+" <small>"+wa+"</small></span>";issues.push("「"+w.Word+"」"+wa+"分");}
