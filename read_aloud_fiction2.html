@@ -6,1158 +6,719 @@
 <title>Read Aloud Practice — Fiction 2</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap');
-:root {
-  --bg:#0f1117; --surface:#1a1d27; --surface2:#222636; --border:#2e3348;
-  --accent:#6c8fff; --accent2:#ff7eb3; --accent3:#4ecdc4;
-  --gold:#ffd166; --text:#e8eaf6; --text-muted:#7880a0;
-  --green:#06d6a0; --red:#ef476f; --orange:#ffa552;
-}
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222636;--border:#2e3348;--accent:#6c8fff;--accent2:#ff7eb3;--accent3:#4ecdc4;--gold:#ffd166;--text:#e8eaf6;--text-muted:#7880a0;--green:#06d6a0;--red:#ef476f;--orange:#ffa552;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Nunito','Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px;}
-
-/* ── Header ── */
-.header{text-align:center;margin-bottom:24px;}
+.header{text-align:center;margin-bottom:20px;}
 .header h1{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .header p{color:var(--text-muted);font-size:.82rem;margin-top:4px;}
-
-/* ── Tabs ── */
-.tabs{display:flex;gap:4px;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto;}
-.tab{flex:1;padding:8px 12px;border-radius:10px;border:none;font-family:inherit;font-size:.82rem;font-weight:800;cursor:pointer;transition:all .2s;background:transparent;color:var(--text-muted);}
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:14px;padding:4px;margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto;}
+.tab{flex:1;padding:8px 10px;border-radius:10px;border:none;font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;transition:all .2s;background:transparent;color:var(--text-muted);}
 .tab.active{background:var(--surface2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
-.tab-pane{display:none;}
-.tab-pane.active{display:block;}
-
-/* ── Voice bar ── */
-.voice-bar{display:flex;gap:8px;justify-content:center;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.tab-pane{display:none;}.tab-pane.active{display:block;}
+.voice-bar{display:flex;gap:8px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
 .voice-lbl{font-size:.78rem;color:var(--text-muted);font-weight:700;}
 .voice-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;}
 .voice-btn.active{border-color:var(--accent);background:rgba(108,143,255,.15);color:var(--accent);}
-
-/* ── Instructions ── */
-.instruction-box{background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.25);border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:.8rem;line-height:1.7;}
-.instruction-box strong{color:var(--accent3);}
-
-/* ── Sentence card ── */
+.instr{background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.25);border-radius:12px;padding:12px 16px;margin-bottom:18px;font-size:.8rem;line-height:1.7;}
+.instr strong{color:var(--accent3);}
 .sentence-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;transition:border-color .3s;}
 .sentence-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:4px 0 0 4px;}
-.sentence-card.recording{border-color:var(--accent2);animation:pulse-border 1s ease-in-out infinite;}
+.sentence-card.recording{border-color:var(--accent2);animation:pb 1s ease-in-out infinite;}
 .sentence-card.done::before{background:linear-gradient(180deg,var(--green),var(--accent3));}
-@keyframes pulse-border{0%,100%{box-shadow:0 0 0 0 rgba(255,126,179,.3)}50%{box-shadow:0 0 0 6px rgba(255,126,179,0)}}
-
-.sentence-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
-.sentence-num{font-size:.7rem;font-weight:800;color:var(--accent);letter-spacing:1px;text-transform:uppercase;}
-.sentence-stats-mini{display:flex;gap:8px;align-items:center;}
-.attempt-badge{font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:10px;background:rgba(108,143,255,.12);color:var(--accent);}
-.best-badge{font-size:.68rem;font-weight:800;padding:2px 8px;border-radius:10px;}
-.best-good{background:rgba(6,214,160,.12);color:var(--green);}
-.best-ok{background:rgba(255,209,102,.12);color:var(--gold);}
-.best-bad{background:rgba(239,71,111,.12);color:var(--red);}
-
-.sentence-text{font-size:1rem;font-weight:700;line-height:1.6;color:var(--text);margin-bottom:5px;}
-.sentence-tip{font-size:.75rem;color:var(--text-muted);margin-bottom:12px;font-weight:600;}
-
-/* ── Mini score chart ── */
-.mini-chart{display:flex;gap:3px;align-items:flex-end;height:28px;margin-bottom:10px;}
-.mini-bar{width:12px;border-radius:2px 2px 0 0;min-height:3px;transition:height .3s;}
-
-/* ── Controls ── */
+@keyframes pb{0%,100%{box-shadow:0 0 0 0 rgba(255,126,179,.3)}50%{box-shadow:0 0 0 6px rgba(255,126,179,0)}}
+.s-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.s-num{font-size:.7rem;font-weight:800;color:var(--accent);letter-spacing:1px;text-transform:uppercase;}
+.s-badges{display:flex;gap:6px;align-items:center;}
+.badge-att{font-size:.67rem;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(108,143,255,.12);color:var(--accent);}
+.badge-best{font-size:.67rem;font-weight:800;padding:2px 7px;border-radius:10px;}
+.bg{background:rgba(6,214,160,.12);color:var(--green);}.bo{background:rgba(255,209,102,.12);color:var(--gold);}.bb{background:rgba(239,71,111,.12);color:var(--red);}
+.mini-chart{display:flex;gap:3px;align-items:flex-end;height:24px;margin-bottom:8px;}
+.mini-bar{width:10px;border-radius:2px 2px 0 0;min-height:2px;}
+.s-text{font-size:1rem;font-weight:700;line-height:1.6;color:var(--text);margin-bottom:5px;}
+.s-tip{font-size:.75rem;color:var(--text-muted);margin-bottom:12px;font-weight:600;}
 .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:10px;border:none;font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.btn:active{transform:scale(.96);}
-.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn:active{transform:scale(.96);}.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
 .btn-play{background:linear-gradient(135deg,var(--accent),#4a7aff);color:white;}
 .btn-play:hover:not(:disabled){filter:brightness(1.15);box-shadow:0 4px 14px rgba(108,143,255,.4);}
-.btn-record{background:linear-gradient(135deg,var(--accent2),#e05c9a);color:white;}
-.btn-record:hover:not(:disabled){filter:brightness(1.15);}
-.btn-record.recording{background:linear-gradient(135deg,var(--red),#cc2d52);animation:pulse-btn 1s ease-in-out infinite;}
-@keyframes pulse-btn{0%,100%{box-shadow:0 4px 14px rgba(239,71,111,.4)}50%{box-shadow:0 4px 22px rgba(239,71,111,.7)}}
-.btn-dl{background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);padding:6px 10px;font-size:.75rem;}
+.btn-rec{background:linear-gradient(135deg,var(--accent2),#e05c9a);color:white;}
+.btn-rec:hover:not(:disabled){filter:brightness(1.15);}
+.btn-rec.recording{background:linear-gradient(135deg,var(--red),#cc2d52);animation:prec 1s ease-in-out infinite;}
+@keyframes prec{0%,100%{box-shadow:0 4px 14px rgba(239,71,111,.4)}50%{box-shadow:0 4px 22px rgba(239,71,111,.7)}}
+.btn-dl{background:var(--surface2);color:var(--text-muted);border:1px solid var(--border);padding:6px 10px;font-size:.74rem;}
 .btn-dl:hover{color:var(--text);border-color:var(--accent3);}
-
-.status-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.74rem;font-weight:700;}
-.status-chip.loading{background:rgba(108,143,255,.15);color:var(--accent);}
-.status-chip.recording{background:rgba(239,71,111,.15);color:var(--red);}
-.status-chip.analyzing{background:rgba(255,209,102,.15);color:var(--gold);}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.74rem;font-weight:700;}
+.chip.loading{background:rgba(108,143,255,.15);color:var(--accent);}
+.chip.recding{background:rgba(239,71,111,.15);color:var(--red);}
+.chip.analyzing{background:rgba(255,209,102,.15);color:var(--gold);}
 .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:blink 1s ease-in-out infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-
-/* ── Level bar ── */
-.level-bar-wrap{width:100%;margin-top:6px;display:none;}
-.level-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
-.level-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--accent3));border-radius:3px;transition:width .1s;width:0%;}
-
-/* ── Score panel ── */
+.lvl-wrap{width:100%;margin-top:6px;display:none;}
+.lvl-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.lvl-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--accent3));border-radius:3px;transition:width .1s;width:0;}
 .score-panel{margin-top:12px;background:var(--surface2);border-radius:12px;padding:14px;border:1px solid var(--border);display:none;}
-.score-panel.visible{display:block;animation:slide-in .3s ease;}
-@keyframes slide-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.score-panel.visible{display:block;animation:si .3s ease;}
+@keyframes si{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 .score-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
-.score-badge{flex:1;min-width:60px;text-align:center;padding:7px 4px;border-radius:10px;background:var(--surface);border:1px solid var(--border);}
-.score-badge .val{font-size:1.3rem;font-weight:900;line-height:1;margin-bottom:2px;}
-.score-badge .lbl{font-size:.62rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
-.score-good{color:var(--green);} .score-ok{color:var(--gold);} .score-bad{color:var(--red);}
-.word-feedback{font-size:.8rem;line-height:2;margin-bottom:8px;}
-.word-chip{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:6px;margin:2px 3px;font-weight:700;font-size:.78rem;}
-.word-ok{background:rgba(6,214,160,.12);color:var(--green);}
-.word-warn{background:rgba(255,165,82,.15);color:var(--orange);}
-.word-err{background:rgba(239,71,111,.15);color:var(--red);}
-.feedback-note{padding:9px 11px;background:rgba(108,143,255,.08);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:.78rem;line-height:1.6;}
-.section-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px;}
-
-/* ══════════════════════════════════════════
-   DASHBOARD TAB
-══════════════════════════════════════════ */
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
-.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
-.dash-card.full{grid-column:1/-1;}
-.dash-num{font-size:2rem;font-weight:900;line-height:1;}
-.dash-label{font-size:.72rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;}
-.dash-sub{font-size:.75rem;color:var(--text-muted);margin-top:6px;}
-
-.progress-ring-wrap{display:flex;align-items:center;gap:16px;}
-.ring-labels{flex:1;}
-.ring-label-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.ring-label-name{font-size:.75rem;color:var(--text-muted);}
-.ring-label-val{font-size:.82rem;font-weight:800;}
-
-/* Sentence summary table */
-.sent-table{width:100%;border-collapse:collapse;}
-.sent-table th{font-size:.68rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
-.sent-table td{padding:8px;font-size:.78rem;border-bottom:1px solid rgba(46,51,72,.5);vertical-align:middle;}
-.sent-table tr:last-child td{border-bottom:none;}
-.spark{display:flex;gap:2px;align-items:flex-end;height:22px;}
-.spark-bar{width:8px;border-radius:1px 1px 0 0;min-height:2px;}
-
-/* Score history log */
-.history-log{max-height:300px;overflow-y:auto;}
-.log-item{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(46,51,72,.5);font-size:.76rem;}
-.log-item:last-child{border-bottom:none;}
-.log-date{color:var(--text-muted);min-width:80px;}
-.log-sent{flex:1;color:var(--text);}
-.log-score{font-weight:900;min-width:40px;text-align:right;}
-
-/* Reset button */
+.sbadge{flex:1;min-width:58px;text-align:center;padding:7px 4px;border-radius:10px;background:var(--surface);border:1px solid var(--border);}
+.sbadge .val{font-size:1.3rem;font-weight:900;line-height:1;margin-bottom:2px;}
+.sbadge .lbl{font-size:.62rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.sg{color:var(--green);}.so{color:var(--gold);}.sr{color:var(--red);}
+.word-row{font-size:.8rem;line-height:2;margin-bottom:8px;}
+.wc{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:6px;margin:2px 3px;font-weight:700;font-size:.78rem;}
+.wok{background:rgba(6,214,160,.12);color:var(--green);}.wwarn{background:rgba(255,165,82,.15);color:var(--orange);}.werr{background:rgba(239,71,111,.15);color:var(--red);}
+.fnote{padding:9px 11px;background:rgba(108,143,255,.08);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;font-size:.78rem;line-height:1.6;}
+.stitle{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px;}
+/* Dashboard */
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.dcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.dcard.full{grid-column:1/-1;}
+.dnum{font-size:2rem;font-weight:900;line-height:1;}
+.dlbl{font-size:.72rem;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:4px;}
+.dsub{font-size:.75rem;color:var(--text-muted);margin-top:6px;}
+.htable{width:100%;border-collapse:collapse;}
+.htable th{font-size:.67rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 8px;text-align:left;border-bottom:1px solid var(--border);}
+.htable td{padding:8px;font-size:.78rem;border-bottom:1px solid rgba(46,51,72,.5);vertical-align:middle;}
+.htable tr:last-child td{border-bottom:none;}
+.spark{display:flex;gap:2px;align-items:flex-end;height:20px;}
+.spbar{width:8px;border-radius:1px 1px 0 0;min-height:2px;}
+.hlog{max-height:280px;overflow-y:auto;}
+.litem{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(46,51,72,.5);font-size:.76rem;}
+.litem:last-child{border-bottom:none;}
+.ldate{color:var(--text-muted);min-width:85px;}
+.lsent{flex:1;}
+.lscore{font-weight:900;min-width:36px;text-align:right;}
 .btn-reset{background:rgba(239,71,111,.1);color:var(--red);border:1px solid rgba(239,71,111,.3);padding:6px 14px;border-radius:8px;font-family:inherit;font-size:.75rem;font-weight:700;cursor:pointer;}
 .btn-reset:hover{background:rgba(239,71,111,.2);}
-
-/* ══════════════════════════════════════════
-   PARENT SUMMARY TAB
-══════════════════════════════════════════ */
-.parent-header{background:linear-gradient(135deg,rgba(108,143,255,.1),rgba(255,126,179,.1));border:1px solid rgba(108,143,255,.2);border-radius:14px;padding:16px;margin-bottom:16px;}
-.parent-title{font-size:1.1rem;font-weight:900;margin-bottom:4px;}
-.parent-sub{font-size:.78rem;color:var(--text-muted);}
-.parent-section{margin-bottom:20px;}
-.parent-section-title{font-size:.8rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
-.alert-box{background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.25);border-radius:10px;padding:12px 14px;font-size:.8rem;line-height:1.7;margin-bottom:10px;}
-.alert-box.good{background:rgba(6,214,160,.08);border-color:rgba(6,214,160,.25);}
-.alert-box.warn{background:rgba(255,165,82,.08);border-color:rgba(255,165,82,.25);}
-
-.svg-chart{width:100%;height:120px;}
+.svg-chart{width:100%;}
+/* Parent */
+.p-header{background:linear-gradient(135deg,rgba(108,143,255,.1),rgba(255,126,179,.1));border:1px solid rgba(108,143,255,.2);border-radius:14px;padding:16px;margin-bottom:16px;}
+.p-sec{margin-bottom:20px;}
+.p-sec-title{font-size:.8rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.abox{border-radius:10px;padding:11px 14px;font-size:.8rem;line-height:1.7;margin-bottom:8px;}
+.abox.info{background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.25);}
+.abox.good{background:rgba(6,214,160,.08);border:1px solid rgba(6,214,160,.25);}
+.abox.warn{background:rgba(255,165,82,.08);border:1px solid rgba(255,165,82,.25);}
 </style>
 </head>
 <body>
-
 <div class="header">
-  <h1>🎧 Read Aloud Practice</h1>
-  <p>Fiction 2 · Why Monkeys Live in Trees · GRL P · 630L</p>
+  <h1>&#127911; Read Aloud Practice</h1>
+  <p>Fiction 2 &middot; Why Monkeys Live in Trees &middot; GRL P &middot; 630L</p>
 </div>
-
-<!-- Tabs -->
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('practice')">🎙 练习</button>
-  <button class="tab" onclick="switchTab('dashboard')">📊 我的进度</button>
-  <button class="tab" onclick="switchTab('parent')">👨‍👩‍👦 家长报告</button>
+  <button class="tab active" id="tab-btn-practice" onclick="switchTab('practice')">&#127897; 练习</button>
+  <button class="tab" id="tab-btn-dashboard" onclick="switchTab('dashboard')">&#128202; 我的进度</button>
+  <button class="tab" id="tab-btn-parent" onclick="switchTab('parent')">&#128106; 家长报告</button>
 </div>
 
-<!-- ═══════════════ PRACTICE TAB ═══════════════ -->
+<!-- PRACTICE -->
 <div id="tab-practice" class="tab-pane active">
-
   <div class="voice-bar">
     <span class="voice-lbl">朗读声音：</span>
-    <button class="voice-btn active" id="v-Andrew" onclick="selectVoice('en-US-AndrewNeural','Andrew')">🧑 Andrew</button>
-    <button class="voice-btn" id="v-Ava" onclick="selectVoice('en-US-AvaNeural','Ava')">👩 Ava</button>
-    <button class="voice-btn" id="v-Emma" onclick="selectVoice('en-US-EmmaNeural','Emma')">👧 Emma</button>
+    <button class="voice-btn active" id="v-Andrew" onclick="selectVoice('en-US-AndrewNeural','Andrew')">&#129489; Andrew（男声）</button>
+    <button class="voice-btn" id="v-Ava" onclick="selectVoice('en-US-AvaNeural','Ava')">&#128105; Ava（女声）</button>
+    <button class="voice-btn" id="v-Emma" onclick="selectVoice('en-US-EmmaNeural','Emma')">&#128103; Emma（女声）</button>
   </div>
-
-  <div class="instruction-box">
-    <strong>📋 使用说明</strong><br>
-    ① 点击 <strong>▶ 听范读</strong> 收听示范，注意语音语调<br>
-    ② 点击 <strong>🎙 开始录音</strong> 大声朗读，完成后再次点击停止<br>
-    ③ 查看 AI 发音评分和逐词分析<br>
-    ④ 可下载录音文件留存 · 目标：综合分 ≥ 85
+  <div class="instr">
+    <strong>&#128203; 使用说明</strong><br>
+    &#9312; 点击 <strong>&#9654; 听范读</strong> 收听示范，注意语音语调<br>
+    &#9313; 点击 <strong>&#127897; 开始录音</strong> 大声朗读，完成后再次点击停止<br>
+    &#9314; 查看 AI 发音评分和逐词分析<br>
+    &#9315; 可下载录音文件留存 &middot; 目标：综合分 &ge; 85
   </div>
-
   <div id="sentences-container"></div>
 </div>
 
-<!-- ═══════════════ DASHBOARD TAB ═══════════════ -->
+<!-- DASHBOARD -->
 <div id="tab-dashboard" class="tab-pane">
-  <div class="dash-grid">
-    <div class="dash-card">
-      <div class="dash-num accent" id="d-total-attempts" style="color:var(--accent)">0</div>
-      <div class="dash-label">总练习次数</div>
-      <div class="dash-sub" id="d-last-date">尚未开始练习</div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-num" id="d-avg-score" style="color:var(--gold)">—</div>
-      <div class="dash-label">平均综合分</div>
-      <div class="dash-sub" id="d-trend"></div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-num" id="d-sentences-done" style="color:var(--green)">0/8</div>
-      <div class="dash-label">完成句子数</div>
-      <div class="dash-sub" id="d-best-sentence"></div>
-    </div>
-    <div class="dash-card">
-      <div class="dash-num" id="d-best-score" style="color:var(--accent2)">—</div>
-      <div class="dash-label">最高单次得分</div>
-      <div class="dash-sub" id="d-best-detail"></div>
-    </div>
+  <div class="dgrid">
+    <div class="dcard"><div class="dnum" id="d-att" style="color:var(--accent)">0</div><div class="dlbl">总练习次数</div><div class="dsub" id="d-lastdate">尚未练习</div></div>
+    <div class="dcard"><div class="dnum" id="d-avg" style="color:var(--gold)">—</div><div class="dlbl">平均综合分</div><div class="dsub" id="d-trend"></div></div>
+    <div class="dcard"><div class="dnum" id="d-done" style="color:var(--green)">0/8</div><div class="dlbl">完成句子数</div><div class="dsub" id="d-best-s"></div></div>
+    <div class="dcard"><div class="dnum" id="d-best" style="color:var(--accent2)">—</div><div class="dlbl">最高单次得分</div><div class="dsub" id="d-best-d"></div></div>
   </div>
-
-  <!-- Overall score trend chart -->
-  <div class="dash-card full" style="margin-bottom:12px;">
-    <div class="section-title" style="margin-bottom:12px;">📈 综合分趋势（最近20次）</div>
-    <svg id="trend-chart" class="svg-chart" viewBox="0 0 600 110" preserveAspectRatio="none">
-      <text x="300" y="60" text-anchor="middle" fill="#7880a0" font-size="14" font-family="Nunito">暂无数据</text>
+  <div class="dcard full" style="margin-bottom:12px;">
+    <div class="stitle" style="margin-bottom:10px;">&#128200; 综合分趋势（最近20次）</div>
+    <svg id="trend-svg" class="svg-chart" height="110" viewBox="0 0 600 110" preserveAspectRatio="none">
+      <text x="300" y="60" text-anchor="middle" fill="#7880a0" font-size="13" font-family="Nunito">暂无数据</text>
     </svg>
   </div>
-
-  <!-- Per-sentence summary -->
-  <div class="dash-card full" style="margin-bottom:12px;">
-    <div class="section-title" style="margin-bottom:10px;">📋 各句子练习详情</div>
-    <table class="sent-table" id="sent-table">
-      <thead><tr>
-        <th>句子</th><th>次数</th><th>最高分</th><th>最新分</th><th>分数变化</th>
-      </tr></thead>
-      <tbody id="sent-table-body"></tbody>
-    </table>
+  <div class="dcard full" style="margin-bottom:12px;">
+    <div class="stitle" style="margin-bottom:10px;">&#128203; 各句子练习详情</div>
+    <table class="htable"><thead><tr><th>句子</th><th>次数</th><th>最高</th><th>最新</th><th>变化</th></tr></thead>
+    <tbody id="sent-tbody"></tbody></table>
   </div>
-
-  <!-- History log -->
-  <div class="dash-card full" style="margin-bottom:12px;">
+  <div class="dcard full" style="margin-bottom:12px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="section-title" style="margin-bottom:0;">📝 练习记录</div>
-      <button class="btn-reset" onclick="confirmReset()">🗑 清除所有数据</button>
+      <div class="stitle" style="margin-bottom:0;">&#128221; 练习记录</div>
+      <button class="btn-reset" onclick="confirmReset()">&#128465; 清除数据</button>
     </div>
-    <div class="history-log" id="history-log">
-      <div style="color:var(--text-muted);font-size:.8rem;padding:12px 0;">暂无练习记录</div>
-    </div>
+    <div class="hlog" id="hlog"><div style="color:var(--text-muted);font-size:.8rem;padding:12px 0;">暂无记录</div></div>
   </div>
 </div>
 
-<!-- ═══════════════ PARENT TAB ═══════════════ -->
+<!-- PARENT -->
 <div id="tab-parent" class="tab-pane">
-  <div class="parent-header">
-    <div class="parent-title">👨‍👩‍👦 家长报告 — 高嘉和</div>
-    <div class="parent-sub" id="p-report-date">报告生成时间：—</div>
+  <div class="p-header">
+    <div style="font-size:1.1rem;font-weight:900;margin-bottom:4px;">&#128106; 家长报告 — 高嘉和</div>
+    <div style="font-size:.78rem;color:var(--text-muted);" id="p-date">报告生成时间：—</div>
   </div>
-
-  <!-- Alerts -->
   <div id="p-alerts"></div>
-
-  <div class="parent-section">
-    <div class="parent-section-title">📊 练习概览</div>
-    <div class="dash-grid">
-      <div class="dash-card">
-        <div class="dash-num" id="p-total" style="color:var(--accent)">0</div>
-        <div class="dash-label">累计练习次数</div>
-      </div>
-      <div class="dash-card">
-        <div class="dash-num" id="p-days" style="color:var(--accent3)">0</div>
-        <div class="dash-label">练习天数</div>
-      </div>
-      <div class="dash-card">
-        <div class="dash-num" id="p-coverage" style="color:var(--gold)">0%</div>
-        <div class="dash-label">句子覆盖率</div>
-      </div>
-      <div class="dash-card">
-        <div class="dash-num" id="p-avg" style="color:var(--green)">—</div>
-        <div class="dash-label">平均得分</div>
-      </div>
+  <div class="p-sec">
+    <div class="p-sec-title">&#128202; 练习概览</div>
+    <div class="dgrid">
+      <div class="dcard"><div class="dnum" id="p-total" style="color:var(--accent)">0</div><div class="dlbl">累计次数</div></div>
+      <div class="dcard"><div class="dnum" id="p-days" style="color:var(--accent3)">0</div><div class="dlbl">练习天数</div></div>
+      <div class="dcard"><div class="dnum" id="p-cov" style="color:var(--gold)">0%</div><div class="dlbl">句子覆盖率</div></div>
+      <div class="dcard"><div class="dnum" id="p-avg" style="color:var(--green)">—</div><div class="dlbl">平均得分</div></div>
     </div>
   </div>
-
-  <div class="parent-section">
-    <div class="parent-section-title">📈 得分趋势图</div>
-    <div class="dash-card full">
-      <svg id="parent-trend-chart" class="svg-chart" style="height:140px;" viewBox="0 0 600 130" preserveAspectRatio="none">
-        <text x="300" y="70" text-anchor="middle" fill="#7880a0" font-size="14" font-family="Nunito">暂无数据</text>
+  <div class="p-sec">
+    <div class="p-sec-title">&#128200; 得分趋势</div>
+    <div class="dcard full">
+      <svg id="p-trend-svg" class="svg-chart" height="130" viewBox="0 0 600 130" preserveAspectRatio="none">
+        <text x="300" y="70" text-anchor="middle" fill="#7880a0" font-size="13" font-family="Nunito">暂无数据</text>
       </svg>
-      <div id="p-trend-legend" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:.72rem;color:var(--text-muted);"></div>
     </div>
   </div>
-
-  <div class="parent-section">
-    <div class="parent-section-title">🎯 各句子掌握情况</div>
-    <div id="p-sentence-grid"></div>
+  <div class="p-sec">
+    <div class="p-sec-title">&#127919; 各句子掌握情况</div>
+    <div id="p-sent-grid"></div>
   </div>
-
-  <div class="parent-section">
-    <div class="parent-section-title">📅 近期练习时间分布</div>
-    <div class="dash-card full">
-      <div id="p-calendar" style="font-size:.78rem;color:var(--text-muted);">暂无数据</div>
-    </div>
+  <div class="p-sec">
+    <div class="p-sec-title">&#128197; 近30天练习日历</div>
+    <div class="dcard full"><div id="p-cal">暂无数据</div></div>
   </div>
-
-  <div class="parent-section">
-    <div class="parent-section-title">💾 录音文件</div>
-    <div class="dash-card full">
-      <div id="p-recordings" style="font-size:.78rem;color:var(--text-muted);">
-        每次练习后点击「⬇ 下载录音」可保存该次录音文件（.webm格式），可用于回听核查。录音文件以「句子编号_日期时间」命名。
-      </div>
+  <div class="p-sec">
+    <div class="p-sec-title">&#128190; 录音文件说明</div>
+    <div class="dcard full" style="font-size:.78rem;color:var(--text-muted);line-height:1.7;">
+      每次练习后点击 <b style="color:var(--accent3)">⬇ 下载录音</b> 保存录音文件（.webm格式），文件以「句子编号_日期时间」命名，可用于回听核查。
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════
-const AZURE_KEY    = "a392bbcb056348109b7b538999be6eb4";
-const AZURE_REGION = "westus";
-const STORAGE_KEY  = "read_aloud_fiction2_v1";
+var AZURE_KEY    = "a392bbcb056348109b7b538999be6eb4";
+var AZURE_REGION = "westus";
+var STORAGE_KEY  = "ral_f2_v1";
+var selectedVoice = "en-US-AndrewNeural";
+var authToken = null, tokenExpiry = 0;
+var recState = {};
 
-let selectedVoice = "en-US-AndrewNeural";
-let authToken = null, tokenExpiry = 0;
-const recState = {};
-
-const SENTENCES = [
-  { id:1, text:"It was the hottest summer anyone could remember.", tip:"注意 hottest 的重音，以及 anyone 的连读", focus:"形容词最高级 + 定语从句" },
-  { id:2, text:"King Gorilla called all the animals together.", tip:"called all 注意 d 和 a 的连读发音", focus:"过去时叙事句" },
-  { id:3, text:"I will give a year's supply of food to whoever eats this pile!", tip:"注意 whoever 和 supply 的发音，这是国王宣告的语气", focus:"WHOEVER 引导名词从句" },
-  { id:4, text:"The hippo waddled up to the pile and gobbled it down in three big mouthfuls.", tip:"waddled 和 gobbled 是生动的动作词，读出夸张感！", focus:"过去式连续动作" },
-  { id:5, text:"His tongue felt as if it was on fire, and Lion raced to the river to gulp some of its cooling waters.", tip:"as if 之后短暂停顿，gulp 是一个音节", focus:"as if 虚拟比较 + 目的不定式" },
-  { id:6, text:"Before I take my turn, I have one request.", tip:"Monkey 策略性的请求语气，读时冷静、有计划", focus:"时间状语从句 + 直接引语" },
-  { id:7, text:"Leopard was astonished by what he saw.", tip:"astonished 四个音节，重音在第二节 -ston-", focus:"be + 情感形容词 + what 从句" },
-  { id:8, text:"Even today, monkeys are afraid to come down to the ground. That's why they still live in the treetops.", tip:"故事结尾语气平稳有余韵，That's why 略微强调", focus:"That's why 结果句（故事结尾套语）" },
+var SENTENCES = [
+  {id:1, text:"It was the hottest summer anyone could remember.", tip:"注意 hottest 的重音，以及 anyone 的连读", focus:"形容词最高级 + 定语从句"},
+  {id:2, text:"King Gorilla called all the animals together.", tip:"called all 注意 d 和 a 的连读发音", focus:"过去时叙事句"},
+  {id:3, text:"I will give a year's supply of food to whoever eats this pile!", tip:"注意 whoever 和 supply 的发音，这是国王宣告的语气", focus:"WHOEVER 引导名词从句"},
+  {id:4, text:"The hippo waddled up to the pile and gobbled it down in three big mouthfuls.", tip:"waddled 和 gobbled 是生动的动作词，读出夸张感！", focus:"过去式连续动作"},
+  {id:5, text:"His tongue felt as if it was on fire, and Lion raced to the river to gulp some of its cooling waters.", tip:"as if 之后短暂停顿，gulp 是一个音节", focus:"as if 虚拟比较 + 目的不定式"},
+  {id:6, text:"Before I take my turn, I have one request.", tip:"Monkey 策略性的请求语气，读时冷静、有计划", focus:"时间状语从句 + 直接引语"},
+  {id:7, text:"Leopard was astonished by what he saw.", tip:"astonished 四个音节，重音在第二节 -ston-", focus:"be + 情感形容词 + what 从句"},
+  {id:8, text:"Even today, monkeys are afraid to come down to the ground. That's why they still live in the treetops.", tip:"故事结尾语气平稳有余韵，That's why 略微强调", focus:"That's why 结果句（故事结尾套语）"}
 ];
 
-// ═══════════════════════════════════════════════════════════
-// DATA PERSISTENCE  (localStorage)
-// ═══════════════════════════════════════════════════════════
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return { attempts: [] };
-  // attempt = { ts, sentenceId, overall, accuracy, fluency, completeness, prosody, recognized }
+// ── Storage ──────────────────────────────────────────────
+function loadData(){
+  try{ var r=localStorage.getItem(STORAGE_KEY); if(r) return JSON.parse(r); }catch(e){}
+  return {attempts:[]};
+}
+function saveData(d){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(d));}catch(e){} }
+function recordAttempt(sid, sc){
+  var d=loadData();
+  d.attempts.push({ts:Date.now(),sentenceId:sid,overall:Math.round(sc.overall),
+    accuracy:Math.round(sc.accuracy),fluency:Math.round(sc.fluency),
+    completeness:Math.round(sc.completeness),prosody:Math.round(sc.prosody)});
+  saveData(d);
 }
 
-function saveData(data) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
-}
-
-function recordAttempt(sentenceId, scores) {
-  const data = loadData();
-  data.attempts.push({
-    ts: Date.now(),
-    sentenceId,
-    overall:      Math.round(scores.overall),
-    accuracy:     Math.round(scores.accuracy),
-    fluency:      Math.round(scores.fluency),
-    completeness: Math.round(scores.completeness),
-    prosody:      Math.round(scores.prosody),
-    recognized:   scores.recognized || ""
+// ── Tabs ─────────────────────────────────────────────────
+function switchTab(name){
+  ["practice","dashboard","parent"].forEach(function(n){
+    document.getElementById("tab-btn-"+n).classList.toggle("active", n===name);
+    document.getElementById("tab-"+n).classList.toggle("active", n===name);
   });
-  saveData(data);
+  if(name==="dashboard") renderDashboard();
+  if(name==="parent")    renderParent();
 }
 
-// ═══════════════════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════════════════
-function switchTab(name) {
-  document.querySelectorAll(".tab").forEach(function(t,i) {
-    const names = ["practice","dashboard","parent"];
-    t.classList.toggle("active", names[i] === name);
-  });
-  document.querySelectorAll(".tab-pane").forEach(function(p) {
-    p.classList.toggle("active", p.id === "tab-" + name);
-  });
-  if (name === "dashboard") renderDashboard();
-  if (name === "parent")    renderParent();
+// ── Token ─────────────────────────────────────────────────
+async function getToken(){
+  var now=Date.now();
+  if(authToken && now<tokenExpiry) return authToken;
+  var resp=await fetch("https://"+AZURE_REGION+".api.cognitive.microsoft.com/sts/v1.0/issueToken",
+    {method:"POST",headers:{"Ocp-Apim-Subscription-Key":AZURE_KEY}});
+  if(!resp.ok) throw new Error("Token "+resp.status);
+  authToken=await resp.text(); tokenExpiry=now+8*60*1000; return authToken;
 }
 
-// ═══════════════════════════════════════════════════════════
-// AZURE — token
-// ═══════════════════════════════════════════════════════════
-async function getToken() {
-  const now = Date.now();
-  if (authToken && now < tokenExpiry) return authToken;
-  const resp = await fetch(
-    "https://" + AZURE_REGION + ".api.cognitive.microsoft.com/sts/v1.0/issueToken",
-    { method:"POST", headers:{ "Ocp-Apim-Subscription-Key": AZURE_KEY } }
-  );
-  if (!resp.ok) throw new Error("Token failed: " + resp.status);
-  authToken = await resp.text();
-  tokenExpiry = now + 8 * 60 * 1000;
-  return authToken;
+// ── Voice ─────────────────────────────────────────────────
+function selectVoice(voice,name){
+  selectedVoice=voice;
+  document.querySelectorAll(".voice-btn").forEach(function(b){b.classList.remove("active");});
+  var el=document.getElementById("v-"+name); if(el) el.classList.add("active");
 }
 
-// ═══════════════════════════════════════════════════════════
-// VOICE SELECT
-// ═══════════════════════════════════════════════════════════
-function selectVoice(voice, name) {
-  selectedVoice = voice;
-  document.querySelectorAll(".voice-btn").forEach(function(b) { b.classList.remove("active"); });
-  var el = document.getElementById("v-" + name);
-  if (el) el.classList.add("active");
-}
-
-// ═══════════════════════════════════════════════════════════
-// TTS PLAYBACK
-// ═══════════════════════════════════════════════════════════
-async function playSentence(sentenceId, text, btn) {
-  btn.disabled = true;
-  var chip = document.getElementById("status-" + sentenceId);
-  chip.innerHTML = '<span class="dot"></span> 合成中…';
-  chip.className = "status-chip loading";
-  chip.style.display = "inline-flex";
-  try {
-    const token = await getToken();
-    const safeText = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
-    const ssml = "<speak version='1.0' xml:lang='en-US'><voice name='" + selectedVoice + "'><prosody rate='-5%'>" + safeText + "</prosody></voice></speak>";
-    const resp = await fetch(
-      "https://" + AZURE_REGION + ".tts.speech.microsoft.com/cognitiveservices/v1",
-      { method:"POST", headers:{
-        "Authorization":"Bearer " + token,
+// ── TTS ───────────────────────────────────────────────────
+async function playSentence(sid,text,btn){
+  btn.disabled=true;
+  var chip=document.getElementById("chip-"+sid);
+  chip.innerHTML='<span class="dot"></span> 合成中…'; chip.className="chip loading"; chip.style.display="inline-flex";
+  try{
+    var token=await getToken();
+    var safe=text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+    var ssml="<speak version='1.0' xml:lang='en-US'><voice name='"+selectedVoice+"'><prosody rate='-5%'>"+safe+"</prosody></voice></speak>";
+    var resp=await fetch("https://"+AZURE_REGION+".tts.speech.microsoft.com/cognitiveservices/v1",
+      {method:"POST",headers:{
+        "Authorization":"Bearer "+token,
         "Content-Type":"application/ssml+xml",
         "X-Microsoft-OutputFormat":"audio-16khz-128kbitrate-mono-mp3",
         "User-Agent":"ReadAloudPractice"
-      }, body: ssml }
-    );
-    if (!resp.ok) throw new Error("TTS failed: " + resp.status);
-    const blob = await resp.blob();
-    const url  = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    chip.innerHTML = "▶ 播放中…";
-    audio.play().catch(function(e) { console.error("Autoplay:", e); });
-    audio.onended = function() { chip.style.display = "none"; btn.disabled = false; };
-    audio.onerror = function() { chip.style.display = "none"; btn.disabled = false; };
-  } catch(e) {
-    console.error("TTS:", e);
-    chip.innerHTML = "❌ " + e.message.slice(0,40);
-    chip.className = "status-chip recording";
-    setTimeout(function() { chip.style.display = "none"; btn.disabled = false; }, 4000);
+      },body:ssml});
+    if(!resp.ok) throw new Error("TTS "+resp.status);
+    var blob=await resp.blob();
+    var url=URL.createObjectURL(blob);
+    var audio=new Audio(url);
+    chip.textContent="▶ 播放中…";
+    audio.play().catch(function(e){console.error("play:",e);});
+    audio.onended=function(){chip.style.display="none";btn.disabled=false;};
+    audio.onerror=function(){chip.style.display="none";btn.disabled=false;};
+  }catch(e){
+    chip.textContent="❌ "+e.message.slice(0,30); chip.className="chip recding";
+    setTimeout(function(){chip.style.display="none";btn.disabled=false;},3000);
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// RECORDING
-// ═══════════════════════════════════════════════════════════
-async function toggleRecord(sentenceId, text, btn) {
-  if (recState[sentenceId] && recState[sentenceId].active) {
-    stopRecording(sentenceId, text);
-  } else {
-    startRecording(sentenceId, text, btn);
-  }
+// ── Recording ─────────────────────────────────────────────
+function toggleRecord(sid,text,btn){
+  if(recState[sid] && recState[sid].active) stopRecording(sid);
+  else startRecording(sid,text,btn);
 }
 
-async function startRecording(sentenceId, text, btn) {
-  if (navigator.permissions) {
-    try {
-      var perm = await navigator.permissions.query({ name:"microphone" });
-      if (perm.state === "denied") {
-        alert("麦克风权限被拒绝。请点击地址栏左侧的锁图标，将麦克风改为允许，然后刷新页面。");
-        return;
-      }
-    } catch(e) {}
+async function startRecording(sid,text,btn){
+  if(navigator.permissions){
+    try{var p=await navigator.permissions.query({name:"microphone"});
+      if(p.state==="denied"){alert("麦克风权限被拒绝，请点击地址栏锁图标允许麦克风");return;}
+    }catch(e){}
   }
-  var card = document.getElementById("card-" + sentenceId);
-  var chip = document.getElementById("status-" + sentenceId);
-  try {
-    var stream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:false }
-    });
-    var mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus"
-                 : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
-    var recorder = new MediaRecorder(stream, mimeType ? { mimeType:mimeType } : {});
-    var chunks = [];
-    recorder.ondataavailable = function(e) { if (e.data.size > 0) chunks.push(e.data); };
-    recorder.onstop = function() {
-      stream.getTracks().forEach(function(t) { t.stop(); });
-      var blob = new Blob(chunks, { type: mimeType || "audio/webm" });
-      analyzeRecording(sentenceId, text, blob, mimeType || "audio/webm");
+  var card=document.getElementById("card-"+sid);
+  var chip=document.getElementById("chip-"+sid);
+  try{
+    var stream=await navigator.mediaDevices.getUserMedia(
+      {audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    var mt=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":
+           MediaRecorder.isTypeSupported("audio/webm")?"audio/webm":"";
+    var recorder=new MediaRecorder(stream, mt?{mimeType:mt}:{});
+    var chunks=[];
+    recorder.ondataavailable=function(e){if(e.data.size>0) chunks.push(e.data);};
+    recorder.onstop=function(){
+      stream.getTracks().forEach(function(t){t.stop();});
+      var blob=new Blob(chunks,{type:mt||"audio/webm"});
+      analyzeRecording(sid,text,blob);
     };
     recorder.start(100);
-
-    // Audio level meter
-    var audioCtx = null, levelInterval = null;
-    try {
-      audioCtx = new AudioContext();
-      var source   = audioCtx.createMediaStreamSource(stream);
-      var analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
-      source.connect(analyser);
-      var dataArray = new Uint8Array(analyser.frequencyBinCount);
-      levelInterval = setInterval(function() {
-        analyser.getByteFrequencyData(dataArray);
-        var sum = 0;
-        for (var i = 0; i < dataArray.length; i++) sum += dataArray[i];
-        var pct = Math.min(100, Math.round(sum / dataArray.length * 2));
-        var fillEl = document.getElementById("lvl-" + sentenceId);
-        if (fillEl) fillEl.style.width = pct + "%";
-        var chipEl = document.getElementById("status-" + sentenceId);
-        if (chipEl) chipEl.textContent = "🎙 " + pct + "%";
-      }, 150);
-    } catch(e) {}
-
-    recState[sentenceId] = { active:true, recorder:recorder, chunks:chunks,
-      mimeType: mimeType || "audio/webm", audioCtx:audioCtx, levelInterval:levelInterval };
-    btn.textContent = "⏹ 停止录音";
-    btn.classList.add("recording");
+    // Level meter
+    var audioCtx=null,lvlInt=null;
+    try{
+      audioCtx=new AudioContext();
+      var src2=audioCtx.createMediaStreamSource(stream);
+      var ana=audioCtx.createAnalyser(); ana.fftSize=256;
+      src2.connect(ana);
+      var arr=new Uint8Array(ana.frequencyBinCount);
+      lvlInt=setInterval(function(){
+        ana.getByteFrequencyData(arr);
+        var sum=0; for(var i=0;i<arr.length;i++) sum+=arr[i];
+        var pct=Math.min(100,Math.round(sum/arr.length*2));
+        var fill=document.getElementById("lvlfill-"+sid); if(fill) fill.style.width=pct+"%";
+        var c=document.getElementById("chip-"+sid); if(c) c.textContent="🎙 "+pct+"%";
+      },150);
+    }catch(e){}
+    recState[sid]={active:true,recorder:recorder,chunks:chunks,mt:mt||"audio/webm",audioCtx:audioCtx,lvlInt:lvlInt};
+    btn.textContent="⏹ 停止录音"; btn.classList.add("recording");
     card.classList.add("recording");
-    chip.className = "status-chip recording";
-    chip.style.display = "inline-flex";
-    chip.textContent = "🎙 录音中…";
-    var lvlWrap = document.getElementById("lvl-bar-" + sentenceId);
-    if (lvlWrap) lvlWrap.style.display = "block";
-    recState[sentenceId].timeout = setTimeout(function() {
-      if (recState[sentenceId] && recState[sentenceId].active) stopRecording(sentenceId, text);
-    }, 20000);
-  } catch(e) {
-    var msg = e.name === "NotAllowedError" ? "麦克风权限被拒绝，请在地址栏允许麦克风访问"
-            : e.name === "NotFoundError"   ? "未检测到麦克风设备，请检查连接"
-            : "麦克风错误：" + e.message;
-    alert(msg);
-    console.error("Mic:", e.name, e.message);
+    chip.className="chip recding"; chip.style.display="inline-flex"; chip.textContent="🎙 录音中…";
+    var lw=document.getElementById("lvlwrap-"+sid); if(lw) lw.style.display="block";
+    recState[sid].timeout=setTimeout(function(){if(recState[sid]&&recState[sid].active)stopRecording(sid);},20000);
+  }catch(e){
+    alert(e.name==="NotAllowedError"?"麦克风权限被拒绝":e.name==="NotFoundError"?"未找到麦克风":"麦克风错误："+e.message);
   }
 }
 
-function stopRecording(sentenceId, text) {
-  var state = recState[sentenceId];
-  if (!state || !state.active) return;
-  clearTimeout(state.timeout);
-  if (state.levelInterval) clearInterval(state.levelInterval);
-  if (state.audioCtx) state.audioCtx.close().catch(function(){});
-  state.recorder.stop();
-  state.active = false;
-  var btn    = document.getElementById("rec-btn-" + sentenceId);
-  var card   = document.getElementById("card-" + sentenceId);
-  var chip   = document.getElementById("status-" + sentenceId);
-  var lvlWrap= document.getElementById("lvl-bar-" + sentenceId);
-  btn.textContent = "🎙 重新录音";
-  btn.classList.remove("recording");
-  btn.disabled = true;
-  card.classList.remove("recording");
-  if (lvlWrap) lvlWrap.style.display = "none";
-  chip.innerHTML = '<span class="dot"></span> AI评分中…';
-  chip.className = "status-chip analyzing";
-  chip.style.display = "inline-flex";
+function stopRecording(sid){
+  var st=recState[sid]; if(!st||!st.active) return;
+  clearTimeout(st.timeout);
+  if(st.lvlInt) clearInterval(st.lvlInt);
+  if(st.audioCtx) st.audioCtx.close().catch(function(){});
+  st.recorder.stop(); st.active=false;
+  var btn=document.getElementById("recbtn-"+sid);
+  var card=document.getElementById("card-"+sid);
+  var chip=document.getElementById("chip-"+sid);
+  var lw=document.getElementById("lvlwrap-"+sid);
+  btn.textContent="🎙 重新录音"; btn.classList.remove("recording"); btn.disabled=true;
+  card.classList.remove("recording"); if(lw) lw.style.display="none";
+  chip.innerHTML='<span class="dot"></span> AI评分中…'; chip.className="chip analyzing"; chip.style.display="inline-flex";
 }
 
-// ═══════════════════════════════════════════════════════════
-// PRONUNCIATION ASSESSMENT
-// ═══════════════════════════════════════════════════════════
-// Convert recorded blob → 16kHz mono WAV for Azure STT
-async function blobToWav(blob) {
-  // Step 1: decode whatever format MediaRecorder produced
-  const arrayBuf = await blob.arrayBuffer();
-  const audioCtx = new AudioContext();
-  let audioBuffer;
-  try {
-    audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
-  } finally {
-    audioCtx.close();
-  }
-
-  // Step 2: resample to 16000 Hz mono via OfflineAudioContext
-  const TARGET_SR  = 16000;
-  const numFrames  = Math.ceil(audioBuffer.duration * TARGET_SR);
-  const offlineCtx = new OfflineAudioContext(1, numFrames, TARGET_SR);
-  const src        = offlineCtx.createBufferSource();
-  src.buffer       = audioBuffer;
-
-  // Mix down to mono if needed
-  if (audioBuffer.numberOfChannels > 1) {
-    const merger = offlineCtx.createChannelMerger(1);
-    src.connect(merger);
-    merger.connect(offlineCtx.destination);
-  } else {
-    src.connect(offlineCtx.destination);
-  }
+// ── WAV conversion ────────────────────────────────────────
+async function toWav(blob){
+  var ab=await blob.arrayBuffer();
+  var actx=new AudioContext();
+  var audioBuf;
+  try{ audioBuf=await actx.decodeAudioData(ab); }finally{ actx.close(); }
+  var SR=16000;
+  var nf=Math.ceil(audioBuf.duration*SR);
+  var off=new OfflineAudioContext(1,nf,SR);
+  var src=off.createBufferSource(); src.buffer=audioBuf;
+  if(audioBuf.numberOfChannels>1){
+    var mg=off.createChannelMerger(1); src.connect(mg); mg.connect(off.destination);
+  }else{ src.connect(off.destination); }
   src.start(0);
-  const resampled = await offlineCtx.startRendering();
-
-  // Step 3: encode as 16-bit PCM WAV
-  const samples    = resampled.getChannelData(0);
-  const numSamples = samples.length;
-  const buf        = new ArrayBuffer(44 + numSamples * 2);
-  const view       = new DataView(buf);
-
-  function writeStr(offset, str) {
-    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  var rb=await off.startRendering();
+  var samps=rb.getChannelData(0);
+  var ns=samps.length;
+  var buf=new ArrayBuffer(44+ns*2);
+  var v=new DataView(buf);
+  function ws(o,s){for(var i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i));}
+  ws(0,"RIFF"); v.setUint32(4,36+ns*2,true); ws(8,"WAVE"); ws(12,"fmt ");
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,SR,true); v.setUint32(28,SR*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  ws(36,"data"); v.setUint32(40,ns*2,true);
+  for(var i=0;i<ns;i++){
+    var s2=Math.max(-1,Math.min(1,samps[i]));
+    v.setInt16(44+i*2,s2<0?s2*0x8000:s2*0x7FFF,true);
   }
-  writeStr(0, "RIFF");
-  view.setUint32(4,  36 + numSamples * 2, true);
-  writeStr(8, "WAVE");
-  writeStr(12, "fmt ");
-  view.setUint32(16, 16,         true);  // chunk size
-  view.setUint16(20,  1,         true);  // PCM
-  view.setUint16(22,  1,         true);  // mono
-  view.setUint32(24, TARGET_SR,  true);  // sample rate
-  view.setUint32(28, TARGET_SR * 2, true); // byte rate
-  view.setUint16(32,  2,         true);  // block align
-  view.setUint16(34, 16,         true);  // bits per sample
-  writeStr(36, "data");
-  view.setUint32(40, numSamples * 2, true);
-  for (let i = 0; i < numSamples; i++) {
-    const s = Math.max(-1, Math.min(1, samples[i]));
-    view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-  }
-  return new Blob([buf], { type: "audio/wav" });
+  return new Blob([buf],{type:"audio/wav"});
 }
 
-async function analyzeRecording(sentenceId, text, audioBlob, mimeType) {
-  var chip  = document.getElementById("status-" + sentenceId);
-  var btn   = document.getElementById("rec-btn-" + sentenceId);
-  var panel = document.getElementById("score-" + sentenceId);
-
-  console.log("Original blob:", audioBlob.size, "bytes |", mimeType);
-  chip.innerHTML = '<span class="dot"></span> 转换音频…';
-  chip.className = "status-chip analyzing";
-  chip.style.display = "inline-flex";
-
-  try {
-    // Convert to WAV
-    let wavBlob;
-    try {
-      wavBlob = await blobToWav(audioBlob);
-      console.log("WAV blob:", wavBlob.size, "bytes");
-    } catch(convErr) {
-      console.warn("WAV conversion failed, using original:", convErr.message);
-      wavBlob = audioBlob;
-    }
-
-    chip.innerHTML = '<span class="dot"></span> AI评分中…';
-
-    const token = await getToken();
-    const buf   = await wavBlob.arrayBuffer();
-    const pronBase64 = btoa(JSON.stringify({
-      ReferenceText: text, GradingSystem:"HundredMark",
-      Dimension:"Comprehensive", EnableMiscue:true, EnableProsodyAssessment:true
-    }));
-    const resp = await fetch(
-      "https://" + AZURE_REGION + ".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed",
-      { method:"POST", headers:{
-        "Authorization":"Bearer " + token,
-        "Content-Type": "audio/wav; codecs=audio/pcm; samplerate=16000",
-        "Pronunciation-Assessment": pronBase64,
+// ── Pronunciation Assessment ──────────────────────────────
+async function analyzeRecording(sid,text,origBlob){
+  var chip=document.getElementById("chip-"+sid);
+  var btn=document.getElementById("recbtn-"+sid);
+  var panel=document.getElementById("panel-"+sid);
+  chip.innerHTML='<span class="dot"></span> 转换音频…'; chip.className="chip analyzing"; chip.style.display="inline-flex";
+  console.log("orig blob:",origBlob.size,"bytes");
+  try{
+    var wavBlob;
+    try{ wavBlob=await toWav(origBlob); console.log("wav blob:",wavBlob.size,"bytes"); }
+    catch(e){ console.warn("wav conv failed:",e.message); wavBlob=origBlob; }
+    chip.innerHTML='<span class="dot"></span> AI评分中…';
+    var token=await getToken();
+    var buf=await wavBlob.arrayBuffer();
+    var pcfg=btoa(JSON.stringify({ReferenceText:text,GradingSystem:"HundredMark",
+      Dimension:"Comprehensive",EnableMiscue:true,EnableProsodyAssessment:true}));
+    var resp=await fetch(
+      "https://"+AZURE_REGION+".stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed",
+      {method:"POST",headers:{
+        "Authorization":"Bearer "+token,
+        "Content-Type":"audio/wav; codecs=audio/pcm; samplerate=16000",
+        "Pronunciation-Assessment":pcfg,
         "Accept":"application/json"
-      }, body: buf }
-    );
-    if (!resp.ok) {
-      const errText = await resp.text();
-      throw new Error("STT " + resp.status + ": " + errText.slice(0,150));
+      },body:buf});
+    if(!resp.ok){var et=await resp.text(); throw new Error("STT "+resp.status+": "+et.slice(0,120));}
+    var result=await resp.json();
+    console.log("STT:",result.RecognitionStatus,"|",result.DisplayText);
+    // Download button
+    var dlBtn=document.getElementById("dlbtn-"+sid);
+    if(dlBtn){
+      var dlUrl=URL.createObjectURL(origBlob);
+      var ts=new Date().toISOString().slice(0,16).replace("T","_").replace(/:/g,"-");
+      (function(url,fn,b){ b.onclick=function(){var a=document.createElement("a");a.href=url;a.download=fn;a.click();}; })(dlUrl,"s"+sid+"_"+ts+".webm",dlBtn);
+      dlBtn.style.display="inline-flex";
     }
-    const result = await resp.json();
-    console.log("STT:", result.RecognitionStatus, "|", result.DisplayText);
-
-    // Save download button (original recording)
-    var dlBtn = document.getElementById("dl-btn-" + sentenceId);
-    if (dlBtn) {
-      var dlUrl = URL.createObjectURL(audioBlob);
-      var ts    = new Date().toISOString().slice(0,16).replace("T","_").replace(/:/g,"-");
-      var fname = "s" + sentenceId + "_" + ts + ".webm";
-      dlBtn.onclick = function() {
-        var a = document.createElement("a"); a.href = dlUrl; a.download = fname; a.click();
-      };
-      dlBtn.style.display = "inline-flex";
-    }
-
-    showScoreResult(sentenceId, text, result, audioBlob);
-  } catch(e) {
-    console.error("Assessment:", e);
-    panel.innerHTML = "<div style='color:var(--red);font-size:.82rem;'>⚠️ 评分出错：" + e.message.slice(0,120) + "</div>";
+    showScore(sid,text,result);
+  }catch(e){
+    console.error("assess:",e);
+    panel.innerHTML="<div style='color:var(--red);font-size:.82rem;'>&#9888; 评分出错："+e.message.slice(0,120)+"</div>";
     panel.classList.add("visible");
-  } finally {
-    chip.style.display = "none";
-    btn.disabled = false;
+  }finally{
+    chip.style.display="none"; btn.disabled=false;
   }
 }
 
-}
+// ── Show Score ────────────────────────────────────────────
+function sc(v){return v>=80?"sg":v>=60?"so":"sr";}
+function scColor(v){return v>=80?"#06d6a0":v>=60?"#ffd166":"#ef476f";}
 
-// ═══════════════════════════════════════════════════════════
-// SHOW SCORE RESULT
-// ═══════════════════════════════════════════════════════════
-function showScoreResult(sentenceId, text, result, audioBlob) {
-  var panel  = document.getElementById("score-" + sentenceId);
-  var status = result.RecognitionStatus || "Unknown";
-
-  if (!result.NBest || !result.NBest[0] || !result.NBest[0].PronunciationAssessment) {
-    var hint = "⚠️ 未检测到语音。";
-    if (status === "NoMatch" || status === "Success") hint += " 请靠近麦克风，大声清晰朗读后再试。";
-    else if (status === "InitialSilenceTimeout")      hint += " 点击录音后请立即开始说话。";
-    else hint += " (状态: " + status + ")";
-    panel.innerHTML = "<div style='color:var(--text-muted);font-size:.82rem;'>" + hint + "</div>";
-    panel.classList.add("visible");
-    return;
+function showScore(sid,text,result){
+  var panel=document.getElementById("panel-"+sid);
+  var status=result.RecognitionStatus||"Unknown";
+  if(!result.NBest||!result.NBest[0]||!result.NBest[0].PronunciationAssessment){
+    var hint="&#9888; 未检测到语音。";
+    if(status==="NoMatch"||status==="Success") hint+=" 请靠近麦克风，大声清晰朗读后再试。";
+    else if(status==="InitialSilenceTimeout") hint+=" 点击录音后请立即说话。";
+    else hint+=" (状态: "+status+")";
+    panel.innerHTML="<div style='color:var(--text-muted);font-size:.82rem;'>"+hint+"</div>";
+    panel.classList.add("visible"); return;
   }
-
-  var pa      = result.NBest[0].PronunciationAssessment;
-  var acc     = Math.round(pa.AccuracyScore     || 0);
-  var flu     = Math.round(pa.FluencyScore      || 0);
-  var comp    = Math.round(pa.CompletenessScore || 0);
-  var pros    = Math.round(pa.ProsodyScore      || 0);
-  var overall = Math.round((acc + flu + comp + pros) / 4);
-  var recog   = result.DisplayText || "";
-
-  // Save to localStorage
-  recordAttempt(sentenceId, { overall:overall, accuracy:acc, fluency:flu,
-    completeness:comp, prosody:pros, recognized:recog });
-
-  // Update mini chart on card
-  updateMiniChart(sentenceId);
-  updateCardBadges(sentenceId);
-
-  function sc(v) { return v >= 80 ? "score-good" : v >= 60 ? "score-ok" : "score-bad"; }
-
-  var words    = result.NBest[0].Words || [];
-  var wordHTML = "";
-  var issues   = [];
-  words.forEach(function(w) {
-    var wAcc    = Math.round((w.PronunciationAssessment && w.PronunciationAssessment.AccuracyScore) || 100);
-    var errType = (w.PronunciationAssessment && w.PronunciationAssessment.ErrorType) || "None";
-    if (errType === "Omission") {
-      wordHTML += "<span class='word-chip word-err'>✗ " + w.Word + "</span>";
-      issues.push("「" + w.Word + "」漏读");
-    } else if (errType === "Insertion") {
-      wordHTML += "<span class='word-chip word-warn'>+" + w.Word + "</span>";
-    } else if (wAcc < 60) {
-      wordHTML += "<span class='word-chip word-err'>" + w.Word + " <small>" + wAcc + "</small></span>";
-      issues.push("「" + w.Word + "」" + wAcc + "分");
-    } else if (wAcc < 80) {
-      wordHTML += "<span class='word-chip word-warn'>" + w.Word + " <small>" + wAcc + "</small></span>";
-    } else {
-      wordHTML += "<span class='word-chip word-ok'>" + w.Word + "</span>";
-    }
+  var pa=result.NBest[0].PronunciationAssessment;
+  var acc=Math.round(pa.AccuracyScore||0);
+  var flu=Math.round(pa.FluencyScore||0);
+  var comp=Math.round(pa.CompletenessScore||0);
+  var pros=Math.round(pa.ProsodyScore||0);
+  var ov=Math.round((acc+flu+comp+pros)/4);
+  recordAttempt(sid,{overall:ov,accuracy:acc,fluency:flu,completeness:comp,prosody:pros});
+  updateMiniChart(sid); updateBadges(sid);
+  var words=result.NBest[0].Words||[];
+  var whtml=""; var issues=[];
+  words.forEach(function(w){
+    var wa=Math.round((w.PronunciationAssessment&&w.PronunciationAssessment.AccuracyScore)||100);
+    var et=(w.PronunciationAssessment&&w.PronunciationAssessment.ErrorType)||"None";
+    if(et==="Omission"){whtml+="<span class='wc werr'>&#10007; "+w.Word+"</span>";issues.push("「"+w.Word+"」漏读");}
+    else if(et==="Insertion"){whtml+="<span class='wc wwarn'>+"+w.Word+"</span>";}
+    else if(wa<60){whtml+="<span class='wc werr'>"+w.Word+" <small>"+wa+"</small></span>";issues.push("「"+w.Word+"」"+wa+"分");}
+    else if(wa<80){whtml+="<span class='wc wwarn'>"+w.Word+" <small>"+wa+"</small></span>";}
+    else{whtml+="<span class='wc wok'>"+w.Word+"</span>";}
   });
-
-  var note = overall >= 85 ? "🎉 非常棒！发音准确流利，继续保持！"
-           : issues.length  ? "💡 需改进：" + issues.slice(0,3).join("、") + "。先听范读再录音。"
-           : flu < 70       ? "💡 发音准确但节奏略慢，练习连读。"
-           : "👍 不错！继续练习提高准确度。";
-
-  panel.innerHTML =
-    "<div class='section-title' style='margin-bottom:10px;'>📊 本次评分</div>" +
-    "<div class='score-row'>" +
-    "<div class='score-badge'><div class='val " + sc(acc)  + "'>" + acc  + "</div><div class='lbl'>准确度</div></div>" +
-    "<div class='score-badge'><div class='val " + sc(flu)  + "'>" + flu  + "</div><div class='lbl'>流利度</div></div>" +
-    "<div class='score-badge'><div class='val " + sc(comp) + "'>" + comp + "</div><div class='lbl'>完整度</div></div>" +
-    "<div class='score-badge'><div class='val " + sc(pros) + "'>" + pros + "</div><div class='lbl'>韵律</div></div>" +
-    "<div class='score-badge' style='background:rgba(108,143,255,.1);border-color:var(--accent)'>" +
-    "<div class='val " + sc(overall) + "' style='font-size:1.5rem'>" + overall + "</div>" +
-    "<div class='lbl' style='color:var(--accent)'>综合</div></div>" +
-    "</div>" +
-    "<div class='section-title'>逐词分析</div>" +
-    "<div class='word-feedback'>" + (wordHTML || "<span style='color:var(--text-muted)'>—</span>") + "</div>" +
-    "<div class='feedback-note'>" + note + "</div>";
+  var note=ov>=85?"&#127881; 非常棒！发音准确流利，继续保持！":
+    issues.length?"&#128161; 需改进："+issues.slice(0,3).join("、")+"。先听范读再录音。":
+    flu<70?"&#128161; 发音准确但节奏略慢，练习连读。":"&#128077; 不错！继续练习提高准确度。";
+  panel.innerHTML=
+    "<div class='stitle' style='margin-bottom:10px;'>&#128202; 本次评分</div>"+
+    "<div class='score-row'>"+
+    "<div class='sbadge'><div class='val "+sc(acc)+"'>"+acc+"</div><div class='lbl'>准确度</div></div>"+
+    "<div class='sbadge'><div class='val "+sc(flu)+"'>"+flu+"</div><div class='lbl'>流利度</div></div>"+
+    "<div class='sbadge'><div class='val "+sc(comp)+"'>"+comp+"</div><div class='lbl'>完整度</div></div>"+
+    "<div class='sbadge'><div class='val "+sc(pros)+"'>"+pros+"</div><div class='lbl'>韵律</div></div>"+
+    "<div class='sbadge' style='background:rgba(108,143,255,.1);border-color:var(--accent)'>"+
+    "<div class='val "+sc(ov)+"' style='font-size:1.5rem'>"+ov+"</div>"+
+    "<div class='lbl' style='color:var(--accent)'>综合</div></div></div>"+
+    "<div class='stitle'>逐词分析</div>"+
+    "<div class='word-row'>"+(whtml||"<span style='color:var(--text-muted)'>—</span>")+"</div>"+
+    "<div class='fnote'>"+note+"</div>";
   panel.classList.add("visible");
 }
 
-// ═══════════════════════════════════════════════════════════
-// MINI CHART + BADGES on sentence cards
-// ═══════════════════════════════════════════════════════════
-function scoreColor(v) {
-  return v >= 80 ? "#06d6a0" : v >= 60 ? "#ffd166" : "#ef476f";
-}
-
-function updateMiniChart(sentenceId) {
-  var data    = loadData();
-  var history = data.attempts.filter(function(a) { return a.sentenceId === sentenceId; });
-  var el      = document.getElementById("mini-chart-" + sentenceId);
-  if (!el || !history.length) return;
-  el.innerHTML = "";
-  var recent = history.slice(-10);
-  recent.forEach(function(a) {
-    var bar = document.createElement("div");
-    bar.className = "mini-bar";
-    bar.style.height = Math.round(a.overall / 100 * 26) + "px";
-    bar.style.background = scoreColor(a.overall);
-    bar.title = a.overall + "分";
-    el.appendChild(bar);
+// ── Mini chart + badges ───────────────────────────────────
+function updateMiniChart(sid){
+  var d=loadData(); var hist=d.attempts.filter(function(a){return a.sentenceId===sid;});
+  var el=document.getElementById("mc-"+sid); if(!el||!hist.length) return;
+  el.innerHTML="";
+  hist.slice(-10).forEach(function(a){
+    var b=document.createElement("div"); b.className="mini-bar";
+    b.style.height=Math.round(a.overall/100*22)+"px"; b.style.background=scColor(a.overall);
+    b.title=a.overall+"分"; el.appendChild(b);
   });
 }
-
-function updateCardBadges(sentenceId) {
-  var data    = loadData();
-  var history = data.attempts.filter(function(a) { return a.sentenceId === sentenceId; });
-  var attEl   = document.getElementById("attempt-" + sentenceId);
-  var bestEl  = document.getElementById("best-" + sentenceId);
-  if (!history.length) return;
-  if (attEl) attEl.textContent = history.length + "次";
-  var best = Math.max.apply(null, history.map(function(a) { return a.overall; }));
-  if (bestEl) {
-    bestEl.textContent = "最高 " + best;
-    bestEl.className   = "best-badge " + (best >= 80 ? "best-good" : best >= 60 ? "best-ok" : "best-bad");
-  }
-  var card = document.getElementById("card-" + sentenceId);
-  if (card && best >= 85) card.classList.add("done");
+function updateBadges(sid){
+  var d=loadData(); var hist=d.attempts.filter(function(a){return a.sentenceId===sid;});
+  if(!hist.length) return;
+  var attEl=document.getElementById("att-"+sid); if(attEl){attEl.textContent=hist.length+"次";attEl.style.display="inline-flex";}
+  var best=Math.max.apply(null,hist.map(function(a){return a.overall;}));
+  var bEl=document.getElementById("best-"+sid);
+  if(bEl){bEl.textContent="最高 "+best;bEl.className="badge-best "+(best>=80?"bg":best>=60?"bo":"bb");bEl.style.display="inline-flex";}
+  var card=document.getElementById("card-"+sid); if(card&&best>=85) card.classList.add("done");
 }
 
-// ═══════════════════════════════════════════════════════════
-// DASHBOARD RENDERING
-// ═══════════════════════════════════════════════════════════
-function renderDashboard() {
-  var data     = loadData();
-  var attempts = data.attempts;
-  if (!attempts.length) return;
+// ── Dashboard ─────────────────────────────────────────────
+function fmtDate(d){return(d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");}
+function fmtFull(d){return d.getFullYear()+"-"+(d.getMonth()+1).toString().padStart(2,"0")+"-"+d.getDate().toString().padStart(2,"0")+" "+d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");}
 
-  // Overall stats
-  var total   = attempts.length;
-  var allScores = attempts.map(function(a) { return a.overall; });
-  var avgScore  = Math.round(allScores.reduce(function(a,b){return a+b;},0) / allScores.length);
-  var bestScore = Math.max.apply(null, allScores);
-  var sentsDone = new Set(attempts.map(function(a){return a.sentenceId;})).size;
-
-  document.getElementById("d-total-attempts").textContent = total;
-  document.getElementById("d-avg-score").textContent      = avgScore;
-  document.getElementById("d-sentences-done").textContent = sentsDone + "/8";
-  document.getElementById("d-best-score").textContent     = bestScore;
-
-  var lastDate = new Date(attempts[attempts.length-1].ts);
-  document.getElementById("d-last-date").textContent = "最后练习：" + fmtDate(lastDate);
-
-  // Trend
-  if (attempts.length >= 4) {
-    var half   = Math.floor(attempts.length / 2);
-    var first  = Math.round(allScores.slice(0,half).reduce(function(a,b){return a+b;},0)/half);
-    var second = Math.round(allScores.slice(half).reduce(function(a,b){return a+b;},0)/(allScores.length-half));
-    var diff   = second - first;
-    document.getElementById("d-trend").textContent = diff >= 0 ? "↑ 较早期提升 " + diff + " 分" : "↓ 较早期下降 " + Math.abs(diff) + " 分";
+function renderDashboard(){
+  var d=loadData(); var atts=d.attempts; if(!atts.length) return;
+  var total=atts.length;
+  var allsc=atts.map(function(a){return a.overall;});
+  var avg=Math.round(allsc.reduce(function(a,b){return a+b;},0)/allsc.length);
+  var best=Math.max.apply(null,allsc);
+  var sids=new Set(atts.map(function(a){return a.sentenceId;}));
+  setText("d-att",total); setText("d-avg",avg); setText("d-done",sids.size+"/8"); setText("d-best",best);
+  setText("d-lastdate","最后练习："+fmtDate(new Date(atts[atts.length-1].ts)));
+  if(atts.length>=4){
+    var h=Math.floor(atts.length/2);
+    var f=Math.round(allsc.slice(0,h).reduce(function(a,b){return a+b;},0)/h);
+    var s2=Math.round(allsc.slice(h).reduce(function(a,b){return a+b;},0)/(atts.length-h));
+    setText("d-trend",(s2-f>=0?"↑ 提升 ":"↓ 下降 ")+Math.abs(s2-f)+"分");
   }
-
-  // Best sentence
-  var bySent = {};
-  attempts.forEach(function(a) {
-    if (!bySent[a.sentenceId]) bySent[a.sentenceId] = [];
-    bySent[a.sentenceId].push(a.overall);
-  });
-  var bestSentId = null, bestSentAvg = 0;
-  Object.keys(bySent).forEach(function(k) {
-    var avg = bySent[k].reduce(function(a,b){return a+b;},0)/bySent[k].length;
-    if (avg > bestSentAvg) { bestSentAvg = avg; bestSentId = k; }
-  });
-  if (bestSentId) {
-    document.getElementById("d-best-sentence").textContent = "最佳：句子 " + bestSentId;
-    document.getElementById("d-best-detail").textContent   = "句子 " + bestSentId + " 第 " + (attempts.filter(function(a){return a.overall===bestScore;})[0]||{sentenceId:"?"}).sentenceId + " 次";
-  }
-
+  var bySent={};
+  atts.forEach(function(a){if(!bySent[a.sentenceId])bySent[a.sentenceId]=[];bySent[a.sentenceId].push(a.overall);});
+  var bsid=null,bsavg=0;
+  Object.keys(bySent).forEach(function(k){var av=bySent[k].reduce(function(a,b){return a+b;},0)/bySent[k].length;if(av>bsavg){bsavg=av;bsid=k;}});
+  if(bsid) setText("d-best-s","最佳：句子 "+bsid);
   // Trend chart
-  renderTrendSVG("trend-chart", attempts.slice(-20), 600, 110);
-
+  renderSVG("trend-svg",atts.slice(-20),600,110,false);
   // Sentence table
-  var tbody = document.getElementById("sent-table-body");
-  tbody.innerHTML = "";
-  SENTENCES.forEach(function(s) {
-    var hist = (bySent[s.id] || []);
-    var tr   = document.createElement("tr");
-    var best = hist.length ? Math.max.apply(null,hist) : null;
-    var last = hist.length ? hist[hist.length-1] : null;
-    var sparkHTML = "<div class='spark'>" + hist.slice(-8).map(function(v) {
-      return "<div class='spark-bar' style='height:" + Math.round(v/100*20) + "px;background:" + scoreColor(v) + "'></div>";
-    }).join("") + "</div>";
-    tr.innerHTML =
-      "<td style='color:var(--text-muted);font-size:.7rem;'>句" + s.id + "</td>" +
-      "<td><b style='color:" + (hist.length ? "var(--accent)" : "var(--border)") + "'>" + (hist.length || "—") + "</b></td>" +
-      "<td><b style='color:" + (best !== null ? scoreColor(best) : "var(--border)") + "'>" + (best !== null ? best : "—") + "</b></td>" +
-      "<td><b style='color:" + (last !== null ? scoreColor(last) : "var(--border)") + "'>" + (last !== null ? last : "—") + "</b></td>" +
-      "<td>" + sparkHTML + "</td>";
+  var tbody=document.getElementById("sent-tbody"); tbody.innerHTML="";
+  SENTENCES.forEach(function(s){
+    var hist=bySent[s.id]||[];
+    var bestv=hist.length?Math.max.apply(null,hist):null;
+    var lastv=hist.length?hist[hist.length-1]:null;
+    var spk="<div class='spark'>"+hist.slice(-8).map(function(v){return "<div class='spbar' style='height:"+Math.round(v/100*18)+"px;background:"+scColor(v)+"'></div>";}).join("")+"</div>";
+    var tr=document.createElement("tr");
+    tr.innerHTML="<td style='color:var(--text-muted);font-size:.7rem'>句"+s.id+"</td>"+
+      "<td><b style='color:"+(hist.length?"var(--accent)":"var(--border)")+"'>"+(hist.length||"—")+"</b></td>"+
+      "<td><b style='color:"+(bestv!==null?scColor(bestv):"var(--border)")+"'>"+(bestv!==null?bestv:"—")+"</b></td>"+
+      "<td><b style='color:"+(lastv!==null?scColor(lastv):"var(--border)")+"'>"+(lastv!==null?lastv:"—")+"</b></td>"+
+      "<td>"+spk+"</td>";
     tbody.appendChild(tr);
   });
-
-  // History log
-  var logEl = document.getElementById("history-log");
-  if (!attempts.length) { logEl.innerHTML = "<div style='color:var(--text-muted);font-size:.8rem;padding:12px 0;'>暂无记录</div>"; return; }
-  logEl.innerHTML = attempts.slice().reverse().slice(0,40).map(function(a) {
-    return "<div class='log-item'>" +
-      "<span class='log-date'>" + fmtDate(new Date(a.ts)) + "</span>" +
-      "<span class='log-sent'>句子 " + a.sentenceId + "</span>" +
-      "<span class='log-score' style='color:" + scoreColor(a.overall) + "'>" + a.overall + "</span>" +
-      "</div>";
+  // Log
+  var logEl=document.getElementById("hlog");
+  logEl.innerHTML=atts.slice().reverse().slice(0,40).map(function(a){
+    return "<div class='litem'><span class='ldate'>"+fmtDate(new Date(a.ts))+"</span>"+
+      "<span class='lsent'>句子 "+a.sentenceId+"</span>"+
+      "<span class='lscore' style='color:"+scColor(a.overall)+"'>"+a.overall+"</span></div>";
   }).join("");
 }
 
-// ═══════════════════════════════════════════════════════════
-// PARENT REPORT
-// ═══════════════════════════════════════════════════════════
-function renderParent() {
-  var data     = loadData();
-  var attempts = data.attempts;
-  document.getElementById("p-report-date").textContent = "报告生成时间：" + fmtDateFull(new Date());
-
-  if (!attempts.length) {
-    document.getElementById("p-alerts").innerHTML = "<div class='alert-box warn'>⚠️ 尚未有任何练习记录。请让孩子打开「练习」标签开始练习。</div>";
-    return;
+// ── Parent report ─────────────────────────────────────────
+function renderParent(){
+  var d=loadData(); var atts=d.attempts;
+  setText("p-date","报告生成时间："+fmtFull(new Date()));
+  if(!atts.length){
+    document.getElementById("p-alerts").innerHTML="<div class='abox warn'>&#9888; 尚未有任何练习记录。</div>"; return;
   }
-
-  var total     = attempts.length;
-  var days      = new Set(attempts.map(function(a){return new Date(a.ts).toDateString();})).size;
-  var coverage  = new Set(attempts.map(function(a){return a.sentenceId;})).size;
-  var allScores = attempts.map(function(a){return a.overall;});
-  var avg       = Math.round(allScores.reduce(function(a,b){return a+b;},0)/allScores.length);
-  var best      = Math.max.apply(null, allScores);
-
-  document.getElementById("p-total").textContent    = total;
-  document.getElementById("p-days").textContent     = days;
-  document.getElementById("p-coverage").textContent = Math.round(coverage/8*100) + "%";
-  document.getElementById("p-avg").textContent      = avg;
-
+  var total=atts.length;
+  var days=new Set(atts.map(function(a){return new Date(a.ts).toDateString();})).size;
+  var cov=new Set(atts.map(function(a){return a.sentenceId;})).size;
+  var allsc=atts.map(function(a){return a.overall;});
+  var avg=Math.round(allsc.reduce(function(a,b){return a+b;},0)/allsc.length);
+  setText("p-total",total); setText("p-days",days);
+  setText("p-cov",Math.round(cov/8*100)+"%"); setText("p-avg",avg);
   // Alerts
-  var alertsHTML = "";
-  var lastTs     = attempts[attempts.length-1].ts;
-  var daysSince  = Math.floor((Date.now() - lastTs) / 86400000);
-  if (daysSince >= 3)
-    alertsHTML += "<div class='alert-box warn'>⚠️ 已 " + daysSince + " 天未练习。上次练习：" + fmtDate(new Date(lastTs)) + "</div>";
-  else
-    alertsHTML += "<div class='alert-box good'>✅ 保持良好！最近练习于 " + fmtDate(new Date(lastTs)) + "</div>";
-
-  var notDone = SENTENCES.filter(function(s){return !attempts.find(function(a){return a.sentenceId===s.id;});});
-  if (notDone.length)
-    alertsHTML += "<div class='alert-box'>📌 以下句子尚未练习：" + notDone.map(function(s){return "句子"+s.id;}).join("、") + "</div>";
-
-  var weakSents = [];
-  SENTENCES.forEach(function(s) {
-    var hist = attempts.filter(function(a){return a.sentenceId===s.id;});
-    if (hist.length && hist[hist.length-1].overall < 60) weakSents.push("句子"+s.id+"("+hist[hist.length-1].overall+"分)");
+  var alertsH="";
+  var last=atts[atts.length-1].ts;
+  var ds=Math.floor((Date.now()-last)/86400000);
+  if(ds>=3) alertsH+="<div class='abox warn'>&#9888; 已 "+ds+" 天未练习。上次："+fmtDate(new Date(last))+"</div>";
+  else alertsH+="<div class='abox good'>&#10003; 保持良好！最近练习于 "+fmtDate(new Date(last))+"</div>";
+  var nd=SENTENCES.filter(function(s){return !atts.find(function(a){return a.sentenceId===s.id;});});
+  if(nd.length) alertsH+="<div class='abox info'>&#128204; 尚未练习："+nd.map(function(s){return "句子"+s.id;}).join("、")+"</div>";
+  document.getElementById("p-alerts").innerHTML=alertsH;
+  // Trend
+  renderSVG("p-trend-svg",atts,600,120,true);
+  // Sent grid
+  var gh="<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'>";
+  var bySent={};
+  atts.forEach(function(a){if(!bySent[a.sentenceId])bySent[a.sentenceId]=[];bySent[a.sentenceId].push(a);});
+  SENTENCES.forEach(function(s){
+    var hist=bySent[s.id]||[];
+    var bestv=hist.length?Math.max.apply(null,hist.map(function(a){return a.overall;})):null;
+    var lastv=hist.length?hist[hist.length-1].overall:null;
+    var spk=hist.length?"<div class='spark' style='height:16px;margin-top:6px;'>"+
+      hist.slice(-10).map(function(a){return "<div class='spbar' style='height:"+Math.round(a.overall/100*14)+"px;width:6px;background:"+scColor(a.overall)+"'></div>";}).join("")+"</div>":
+      "<div style='color:var(--border);font-size:.7rem;margin-top:6px;'>未练习</div>";
+    gh+="<div class='dcard'>"+
+      "<div style='font-size:.67rem;color:var(--text-muted);font-weight:800;text-transform:uppercase;margin-bottom:4px;'>句子 "+s.id+"</div>"+
+      "<div style='font-size:.72rem;line-height:1.4;margin-bottom:6px;'>"+s.text.slice(0,34)+(s.text.length>34?"…":"")+"</div>"+
+      "<div style='display:flex;gap:8px;font-size:.72rem;'>"+
+      "<span style='color:var(--text-muted)'>练 <b style='color:var(--accent)'>"+(hist.length||0)+"</b></span>"+
+      "<span style='color:var(--text-muted)'>最高 <b style='color:"+(bestv!==null?scColor(bestv):"var(--border)")+"'>"+(bestv!==null?bestv:"—")+"</b></span>"+
+      "<span style='color:var(--text-muted)'>最新 <b style='color:"+(lastv!==null?scColor(lastv):"var(--border)")+"'>"+(lastv!==null?lastv:"—")+"</b></span>"+
+      "</div>"+spk+"</div>";
   });
-  if (weakSents.length)
-    alertsHTML += "<div class='alert-box warn'>💡 最新成绩低于60分的句子：" + weakSents.join("、") + "，建议加强练习。</div>";
-
-  document.getElementById("p-alerts").innerHTML = alertsHTML;
-
-  // Per-sentence grid
-  var gridHTML = "<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px;'>";
-  SENTENCES.forEach(function(s) {
-    var hist    = attempts.filter(function(a){return a.sentenceId===s.id;});
-    var bestV   = hist.length ? Math.max.apply(null, hist.map(function(a){return a.overall;})) : null;
-    var lastV   = hist.length ? hist[hist.length-1].overall : null;
-    var cnt     = hist.length;
-    var clr     = bestV !== null ? scoreColor(bestV) : "var(--border)";
-    var sparkH  = hist.length ? "<div class='spark' style='height:18px;margin-top:6px;'>" +
-      hist.slice(-10).map(function(v) {
-        return "<div class='spark-bar' style='height:" + Math.round(v.overall/100*16) + "px;width:6px;background:" + scoreColor(v.overall) + "'></div>";
-      }).join("") + "</div>" : "<div style='color:var(--border);font-size:.7rem;margin-top:6px;'>未练习</div>";
-    gridHTML += "<div class='dash-card'>" +
-      "<div style='font-size:.68rem;color:var(--text-muted);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;'>句子 " + s.id + "</div>" +
-      "<div style='font-size:.72rem;color:var(--text);line-height:1.4;margin-bottom:6px;'>" + s.text.slice(0,35) + (s.text.length>35?"…":"") + "</div>" +
-      "<div style='display:flex;gap:8px;font-size:.72rem;'>" +
-      "<span style='color:var(--text-muted);'>练习 <b style='color:var(--accent)'>" + (cnt||"0") + "</b> 次</span>" +
-      "<span style='color:var(--text-muted);'>最高 <b style='color:" + clr + "'>" + (bestV!==null?bestV:"—") + "</b></span>" +
-      "<span style='color:var(--text-muted);'>最新 <b style='color:" + (lastV!==null?scoreColor(lastV):"var(--border)") + "'>" + (lastV!==null?lastV:"—") + "</b></span>" +
-      "</div>" + sparkH + "</div>";
-  });
-  gridHTML += "</div>";
-  document.getElementById("p-sentence-grid").innerHTML = gridHTML;
-
-  // Trend chart (larger, with score baseline lines)
-  renderTrendSVG("parent-trend-chart", attempts, 600, 120, true);
-
-  // Calendar heatmap (last 30 days)
-  var calHTML = "<div style='font-size:.72rem;font-weight:800;color:var(--text-muted);margin-bottom:8px;'>最近 30 天练习天数标注</div>";
-  calHTML += "<div style='display:flex;gap:4px;flex-wrap:wrap;'>";
-  for (var d = 29; d >= 0; d--) {
-    var day    = new Date(Date.now() - d * 86400000);
-    var dayStr = day.toDateString();
-    var cnt2   = attempts.filter(function(a){ return new Date(a.ts).toDateString()===dayStr; }).length;
-    var scores = attempts.filter(function(a){ return new Date(a.ts).toDateString()===dayStr; }).map(function(a){return a.overall;});
-    var avgD   = scores.length ? Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length) : 0;
-    var opacity= cnt2 ? Math.max(0.2, Math.min(1, cnt2 * 0.25)) : 0.05;
-    var color  = cnt2 ? scoreColor(avgD) : "#2e3348";
-    calHTML += "<div title='" + fmtDate(day) + ": " + (cnt2||"无") + "次练习" + (avgD?" 均分"+avgD:"") + "' style='width:28px;height:28px;border-radius:5px;background:" + color + ";opacity:" + opacity + ";display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;color:white;'>" + (cnt2||"") + "</div>";
+  gh+="</div>";
+  document.getElementById("p-sent-grid").innerHTML=gh;
+  // Calendar
+  var calH="<div style='font-size:.72rem;font-weight:800;color:var(--text-muted);margin-bottom:8px;'>最近 30 天</div><div style='display:flex;gap:4px;flex-wrap:wrap;'>";
+  for(var di=29;di>=0;di--){
+    var day=new Date(Date.now()-di*86400000); var ds2=day.toDateString();
+    var cnt=atts.filter(function(a){return new Date(a.ts).toDateString()===ds2;}).length;
+    var sc2=atts.filter(function(a){return new Date(a.ts).toDateString()===ds2;}).map(function(a){return a.overall;});
+    var avgd=sc2.length?Math.round(sc2.reduce(function(a,b){return a+b;},0)/sc2.length):0;
+    var op=cnt?Math.max(0.2,Math.min(1,cnt*0.3)):0.05;
+    var clr=cnt?scColor(avgd):"#2e3348";
+    calH+="<div title='"+(day.getMonth()+1)+"/"+(day.getDate())+": "+(cnt||"无")+"次"+(avgd?" 均"+avgd:"")+"' style='width:28px;height:28px;border-radius:5px;background:"+clr+";opacity:"+op+";display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;color:white;'>"+(cnt||"")+"</div>";
   }
-  calHTML += "</div><div style='margin-top:6px;font-size:.68rem;color:var(--text-muted);'>颜色=平均分（绿=高 / 橙=中 / 红=低），透明度=次数</div>";
-  document.getElementById("p-calendar").innerHTML = calHTML;
+  calH+="</div><div style='margin-top:6px;font-size:.68rem;color:var(--text-muted);'>颜色=平均分，透明度=次数</div>";
+  document.getElementById("p-cal").innerHTML=calH;
 }
 
-// ═══════════════════════════════════════════════════════════
-// SVG TREND CHART
-// ═══════════════════════════════════════════════════════════
-function renderTrendSVG(svgId, attempts, w, h, showBaselines) {
-  var svg = document.getElementById(svgId);
-  if (!svg || !attempts.length) return;
-  var pad = { l:28, r:12, t:10, b:22 };
-  var cw  = w - pad.l - pad.r;
-  var ch  = h - pad.t - pad.b;
-  var n   = attempts.length;
-
-  var html = "";
-
-  // Baselines
-  if (showBaselines) {
-    [85,70,60].forEach(function(v) {
-      var y = pad.t + ch - Math.round(v / 100 * ch);
-      var clr = v===85?"#06d6a0":v===70?"#ffd166":"#ef476f";
-      html += "<line x1='" + pad.l + "' y1='" + y + "' x2='" + (w-pad.r) + "' y2='" + y + "' stroke='" + clr + "' stroke-width='1' stroke-dasharray='4,3' opacity='0.4'/>";
-      html += "<text x='" + (pad.l-4) + "' y='" + (y+4) + "' fill='" + clr + "' font-size='8' text-anchor='end' font-family='Nunito' font-weight='800'>" + v + "</text>";
+// ── SVG trend chart ───────────────────────────────────────
+function renderSVG(id,atts,w,h,baselines){
+  var svg=document.getElementById(id); if(!svg||!atts.length) return;
+  var pl=28,pr=12,pt=10,pb=22;
+  var cw=w-pl-pr, ch=h-pt-pb, n=atts.length;
+  var html="";
+  if(baselines){
+    [85,70,60].forEach(function(v){
+      var y=pt+ch-Math.round(v/100*ch);
+      var c=v===85?"#06d6a0":v===70?"#ffd166":"#ef476f";
+      html+="<line x1='"+pl+"' y1='"+y+"' x2='"+(w-pr)+"' y2='"+y+"' stroke='"+c+"' stroke-width='1' stroke-dasharray='4,3' opacity='0.4'/>";
+      html+="<text x='"+(pl-4)+"' y='"+(y+4)+"' fill='"+c+"' font-size='8' text-anchor='end' font-family='Nunito' font-weight='800'>"+v+"</text>";
     });
   }
-
-  // X axis
-  html += "<line x1='" + pad.l + "' y1='" + (h-pad.b) + "' x2='" + (w-pad.r) + "' y2='" + (h-pad.b) + "' stroke='#2e3348' stroke-width='1'/>";
-
-  // Bars + line
-  var pts = [];
-  attempts.forEach(function(a, i) {
-    var x   = pad.l + Math.round(i / Math.max(n-1,1) * cw);
-    var y   = pad.t + ch - Math.round(a.overall / 100 * ch);
-    var clr = scoreColor(a.overall);
-    // Bar
-    var bw  = n > 1 ? Math.max(3, Math.floor(cw/n * 0.6)) : 20;
-    html += "<rect x='" + (x-Math.floor(bw/2)) + "' y='" + y + "' width='" + bw + "' height='" + (h-pad.b-y) + "' rx='2' fill='" + clr + "' opacity='0.35'/>";
-    pts.push({ x:x, y:y, clr:clr, score:a.overall });
+  html+="<line x1='"+pl+"' y1='"+(h-pb)+"' x2='"+(w-pr)+"' y2='"+(h-pb)+"' stroke='#2e3348' stroke-width='1'/>";
+  var pts=[];
+  atts.forEach(function(a,i){
+    var x=pl+Math.round(i/Math.max(n-1,1)*cw);
+    var y=pt+ch-Math.round(a.overall/100*ch);
+    var clr=scColor(a.overall);
+    var bw=n>1?Math.max(3,Math.floor(cw/n*0.6)):20;
+    html+="<rect x='"+(x-Math.floor(bw/2))+"' y='"+y+"' width='"+bw+"' height='"+(h-pb-y)+"' rx='2' fill='"+clr+"' opacity='0.35'/>";
+    pts.push({x:x,y:y,clr:clr,s:a.overall});
   });
-
-  // Line
-  if (pts.length > 1) {
-    var d = "M " + pts[0].x + " " + pts[0].y;
-    for (var i = 1; i < pts.length; i++) d += " L " + pts[i].x + " " + pts[i].y;
-    html += "<path d='" + d + "' fill='none' stroke='var(--accent)' stroke-width='2' opacity='0.8'/>";
+  if(pts.length>1){
+    var path="M "+pts[0].x+" "+pts[0].y;
+    for(var i=1;i<pts.length;i++) path+=" L "+pts[i].x+" "+pts[i].y;
+    html+="<path d='"+path+"' fill='none' stroke='var(--accent)' stroke-width='2' opacity='0.8'/>";
   }
-
-  // Dots
-  pts.forEach(function(p) {
-    html += "<circle cx='" + p.x + "' cy='" + p.y + "' r='3.5' fill='" + p.clr + "' stroke='var(--bg)' stroke-width='1.5'/>";
-    html += "<title>" + p.score + "</title>";
+  pts.forEach(function(p){
+    html+="<circle cx='"+p.x+"' cy='"+p.y+"' r='3.5' fill='"+p.clr+"' stroke='var(--bg)' stroke-width='1.5'/>";
   });
-
-  // X labels (first/last + every 5th)
-  if (n > 1) {
-    attempts.forEach(function(a, i) {
-      if (i === 0 || i === n-1 || (n > 8 && i % 5 === 0)) {
-        var x2 = pad.l + Math.round(i / Math.max(n-1,1) * cw);
-        html += "<text x='" + x2 + "' y='" + (h-pad.b+14) + "' fill='#7880a0' font-size='8' text-anchor='middle' font-family='Nunito'>" + (i+1) + "</text>";
+  if(n>1){
+    atts.forEach(function(a,i){
+      if(i===0||i===n-1||(n>8&&i%5===0)){
+        var x2=pl+Math.round(i/Math.max(n-1,1)*cw);
+        html+="<text x='"+x2+"' y='"+(h-pb+14)+"' fill='#7880a0' font-size='8' text-anchor='middle' font-family='Nunito'>"+(i+1)+"</text>";
       }
     });
   }
-
-  svg.innerHTML = html;
+  svg.innerHTML=html;
 }
 
-// ═══════════════════════════════════════════════════════════
-// RESET
-// ═══════════════════════════════════════════════════════════
-function confirmReset() {
-  if (confirm("确认清除所有练习数据？此操作无法恢复。")) {
-    localStorage.removeItem(STORAGE_KEY);
-    renderDashboard();
-    alert("数据已清除。");
+// ── Reset ─────────────────────────────────────────────────
+function confirmReset(){
+  if(confirm("确认清除所有练习数据？此操作无法恢复。")){
+    localStorage.removeItem(STORAGE_KEY); renderDashboard(); alert("数据已清除。");
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════════════════
-function fmtDate(d) {
-  return (d.getMonth()+1) + "/" + d.getDate() + " " + d.getHours().toString().padStart(2,"0") + ":" + d.getMinutes().toString().padStart(2,"0");
-}
-function fmtDateFull(d) {
-  return d.getFullYear() + "-" + (d.getMonth()+1).toString().padStart(2,"0") + "-" + d.getDate().toString().padStart(2,"0") + " " + d.getHours().toString().padStart(2,"0") + ":" + d.getMinutes().toString().padStart(2,"0");
-}
+// ── Utils ─────────────────────────────────────────────────
+function setText(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
 
-// ═══════════════════════════════════════════════════════════
-// RENDER SENTENCE CARDS
-// ═══════════════════════════════════════════════════════════
-function render() {
-  var container = document.getElementById("sentences-container");
-  if (!container) return;
-  container.innerHTML = "";
-  SENTENCES.forEach(function(s) {
-    var card = document.createElement("div");
-    card.className = "sentence-card";
-    card.id = "card-" + s.id;
-
-    var hdr = document.createElement("div");
-    hdr.className = "sentence-header";
-
-    var numEl = document.createElement("div");
-    numEl.className = "sentence-num";
-    numEl.textContent = "句子 " + s.id + " · " + s.focus;
-
-    var statsEl = document.createElement("div");
-    statsEl.className = "sentence-stats-mini";
-    statsEl.innerHTML =
-      "<span class='attempt-badge' id='attempt-" + s.id + "' style='display:none'></span>" +
-      "<span class='best-badge' id='best-" + s.id + "' style='display:none'></span>";
-
-    hdr.appendChild(numEl);
-    hdr.appendChild(statsEl);
-
-    var miniChart = document.createElement("div");
-    miniChart.className = "mini-chart";
-    miniChart.id = "mini-chart-" + s.id;
-
-    var txt = document.createElement("div");
-    txt.className = "sentence-text";
-    txt.textContent = "\u201c" + s.text + "\u201d";
-
-    var tip = document.createElement("div");
-    tip.className = "sentence-tip";
-    tip.textContent = "💡 " + s.tip;
-
-    var controls = document.createElement("div");
-    controls.className = "controls";
-
-    var playBtn = document.createElement("button");
-    playBtn.className = "btn btn-play";
-    playBtn.textContent = "▶ 听范读";
-    (function(id, text) {
-      playBtn.addEventListener("click", function() { playSentence(id, text, this); });
-    })(s.id, s.text);
-
-    var recBtn = document.createElement("button");
-    recBtn.className = "btn btn-record";
-    recBtn.id = "rec-btn-" + s.id;
-    recBtn.textContent = "🎙 开始录音";
-    (function(id, text) {
-      recBtn.addEventListener("click", function() { toggleRecord(id, text, this); });
-    })(s.id, s.text);
-
-    var dlBtn = document.createElement("button");
-    dlBtn.className = "btn btn-dl";
-    dlBtn.id = "dl-btn-" + s.id;
-    dlBtn.textContent = "⬇ 下载录音";
-    dlBtn.style.display = "none";
-
-    var chip = document.createElement("span");
-    chip.className = "status-chip";
-    chip.id = "status-" + s.id;
-    chip.style.display = "none";
-
-    controls.appendChild(playBtn);
-    controls.appendChild(recBtn);
-    controls.appendChild(dlBtn);
-    controls.appendChild(chip);
-
-    var lvlWrap = document.createElement("div");
-    lvlWrap.className = "level-bar-wrap";
-    lvlWrap.id = "lvl-bar-" + s.id;
-    lvlWrap.innerHTML = "<div class='level-bar'><div class='level-fill' id='lvl-" + s.id + "'></div></div>";
-
-    var scorePanel = document.createElement("div");
-    scorePanel.className = "score-panel";
-    scorePanel.id = "score-" + s.id;
-
-    card.appendChild(hdr);
-    card.appendChild(miniChart);
-    card.appendChild(txt);
-    card.appendChild(tip);
-    card.appendChild(controls);
-    card.appendChild(lvlWrap);
-    card.appendChild(scorePanel);
-    container.appendChild(card);
+// ── Render sentence cards ─────────────────────────────────
+function render(){
+  var c=document.getElementById("sentences-container"); if(!c) return;
+  c.innerHTML="";
+  SENTENCES.forEach(function(s){
+    var card=document.createElement("div");
+    card.className="sentence-card"; card.id="card-"+s.id;
+    // Header
+    var hdr=document.createElement("div"); hdr.className="s-header";
+    var num=document.createElement("div"); num.className="s-num";
+    num.textContent="句子 "+s.id+" · "+s.focus;
+    var badges=document.createElement("div"); badges.className="s-badges";
+    var attBadge=document.createElement("span"); attBadge.className="badge-att"; attBadge.id="att-"+s.id; attBadge.style.display="none";
+    var bestBadge=document.createElement("span"); bestBadge.className="badge-best"; bestBadge.id="best-"+s.id; bestBadge.style.display="none";
+    badges.appendChild(attBadge); badges.appendChild(bestBadge);
+    hdr.appendChild(num); hdr.appendChild(badges);
+    // Mini chart
+    var mc=document.createElement("div"); mc.className="mini-chart"; mc.id="mc-"+s.id;
+    // Text (no quotes)
+    var txt=document.createElement("div"); txt.className="s-text"; txt.textContent=s.text;
+    // Tip
+    var tip=document.createElement("div"); tip.className="s-tip"; tip.textContent="💡 "+s.tip;
+    // Controls
+    var ctrl=document.createElement("div"); ctrl.className="controls";
+    var playBtn=document.createElement("button"); playBtn.className="btn btn-play"; playBtn.textContent="▶ 听范读";
+    (function(id,text){playBtn.addEventListener("click",function(){playSentence(id,text,this);});})(s.id,s.text);
+    var recBtn=document.createElement("button"); recBtn.className="btn btn-rec"; recBtn.id="recbtn-"+s.id; recBtn.textContent="🎙 开始录音";
+    (function(id,text){recBtn.addEventListener("click",function(){toggleRecord(id,text,this);});})(s.id,s.text);
+    var dlBtn=document.createElement("button"); dlBtn.className="btn btn-dl"; dlBtn.id="dlbtn-"+s.id; dlBtn.textContent="⬇ 下载录音"; dlBtn.style.display="none";
+    var chip=document.createElement("span"); chip.className="chip"; chip.id="chip-"+s.id; chip.style.display="none";
+    ctrl.appendChild(playBtn); ctrl.appendChild(recBtn); ctrl.appendChild(dlBtn); ctrl.appendChild(chip);
+    // Level bar
+    var lw=document.createElement("div"); lw.className="lvl-wrap"; lw.id="lvlwrap-"+s.id;
+    var lb=document.createElement("div"); lb.className="lvl-bar";
+    var lf=document.createElement("div"); lf.className="lvl-fill"; lf.id="lvlfill-"+s.id;
+    lb.appendChild(lf); lw.appendChild(lb);
+    // Score panel
+    var panel=document.createElement("div"); panel.className="score-panel"; panel.id="panel-"+s.id;
+    // Assemble
+    card.appendChild(hdr); card.appendChild(mc); card.appendChild(txt);
+    card.appendChild(tip); card.appendChild(ctrl); card.appendChild(lw); card.appendChild(panel);
+    c.appendChild(card);
   });
-
-  // Load existing data into cards
-  SENTENCES.forEach(function(s) {
-    updateMiniChart(s.id);
-    updateCardBadges(s.id);
-    var attEl = document.getElementById("attempt-" + s.id);
-    var bestEl = document.getElementById("best-" + s.id);
-    if (attEl) attEl.style.display = "inline-flex";
-    if (bestEl) bestEl.style.display = "inline-flex";
-  });
+  // Load existing data
+  SENTENCES.forEach(function(s){updateMiniChart(s.id);updateBadges(s.id);});
 }
 
 render();
