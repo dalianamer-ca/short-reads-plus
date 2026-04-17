@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎧 Read Aloud Practice — Fiction 2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222636;
+    --border: #2e3348;
+    --accent: #6c8fff;
+    --accent2: #ff7eb3;
+    --accent3: #4ecdc4;
+    --gold: #ffd166;
+    --text: #e8eaf6;
+    --text-muted: #7880a0;
+    --green: #06d6a0;
+    --red: #ef476f;
+    --orange: #ffa552;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .header h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  /* Voice selector */
+  .voice-bar {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .voice-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .voice-btn.active {
+    border-color: var(--accent);
+    background: rgba(108,143,255,0.15);
+    color: var(--accent);
+  }
+
+  /* Sentence card */
+  .sentence-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .sentence-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    border-radius: 4px 0 0 4px;
+  }
+  .sentence-card.recording {
+    border-color: var(--accent2);
+    animation: pulse-border 1s ease-in-out infinite;
+  }
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,126,179,0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(255,126,179,0); }
+  }
+
+  .sentence-num {
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .sentence-text {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .sentence-tip {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: none;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-play {
+    background: linear-gradient(135deg, var(--accent), #4a7aff);
+    color: white;
+  }
+  .btn-play:hover:not(:disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 4px 16px rgba(108,143,255,0.4);
+  }
+
+  .btn-record {
+    background: linear-gradient(135deg, var(--accent2), #e05c9a);
+    color: white;
+  }
+  .btn-record:hover:not(:disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 4px 16px rgba(255,126,179,0.4);
+  }
+  .btn-record.recording {
+    background: linear-gradient(135deg, var(--red), #cc2d52);
+    animation: pulse-btn 1s ease-in-out infinite;
+  }
+  @keyframes pulse-btn {
+    0%, 100% { box-shadow: 0 4px 16px rgba(239,71,111,0.4); }
+    50% { box-shadow: 0 4px 24px rgba(239,71,111,0.7); }
+  }
+
+  .btn-small {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+  }
+  .btn-small:hover:not(:disabled) {
+    color: var(--text);
+    border-color: var(--text-muted);
+  }
+
+  /* Status indicator */
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .status-chip.loading { background: rgba(108,143,255,0.15); color: var(--accent); }
+  .status-chip.recording { background: rgba(239,71,111,0.15); color: var(--red); }
+  .status-chip.analyzing { background: rgba(255,209,102,0.15); color: var(--gold); }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: blink 1s ease-in-out infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* Score result panel */
+  .score-panel {
+    margin-top: 14px;
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    display: none;
+  }
+  .score-panel.visible { display: block; animation: slide-in 0.3s ease; }
+  @keyframes slide-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .score-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .score-badge {
+    flex: 1;
+    min-width: 70px;
+    text-align: center;
+    padding: 8px 6px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .score-badge .val {
+    font-size: 1.4rem;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .score-badge .lbl {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .score-good { color: var(--green); }
+  .score-ok { color: var(--gold); }
+  .score-bad { color: var(--red); }
+
+  /* Word-level feedback */
+  .word-feedback {
+    font-size: 0.82rem;
+    line-height: 2;
+  }
+  .word-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    margin: 2px 3px;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .word-ok { background: rgba(6,214,160,0.12); color: var(--green); }
+  .word-warn { background: rgba(255,165,82,0.15); color: var(--orange); }
+  .word-err { background: rgba(239,71,111,0.15); color: var(--red); }
+
+  .feedback-note {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(108,143,255,0.08);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* Instructions box */
+  .instruction-box {
+    background: rgba(78,205,196,0.08);
+    border: 1px solid rgba(78,205,196,0.25);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .instruction-box strong { color: var(--accent3); }
+
+  /* Overall progress */
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 20px;
+    height: 6px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, var(--green), var(--accent3));
+    transition: width 0.6s ease;
+  }
+
+  .section-title {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  audio { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎧 Read Aloud Practice</h1>
+  <p>Fiction 2 · Why Monkeys Live in Trees · GRL P · 630L</p>
+</div>
+
+<!-- Voice selector -->
+<div class="voice-bar">
+  <span style="font-size:0.78rem;color:var(--text-muted);font-weight:700;align-self:center;">朗读声音：</span>
+  <button class="voice-btn active" onclick="selectVoice('en-US-AndrewNeural','Andrew')" id="v-Andrew">🧑 Andrew（男声）</button>
+  <button class="voice-btn" onclick="selectVoice('en-US-AvaNeural','Ava')" id="v-Ava">👩 Ava（女声）</button>
+  <button class="voice-btn" onclick="selectVoice('en-US-EmmaNeural','Emma')" id="v-Emma">👧 Emma（女声）</button>
+</div>
+
+<!-- Instructions -->
+<div class="instruction-box">
+  <strong>📋 使用说明</strong><br>
+  ① 点击 <strong>▶ 听范读</strong> 收听示范音频，注意语音语调<br>
+  ② 点击 <strong>🎙 开始录音</strong> 后大声朗读句子，完成后再次点击停止<br>
+  ③ AI 将对你的发音进行评分，并标出需要改进的单词<br>
+  ④ 反复练习，直到 <strong>准确度 ≥ 85</strong> 为止
+</div>
+
+<div id="sentences-container"></div>
+
+<!-- Azure config (filled by server) -->
+<script>
+const AZURE_KEY = "a392bbcb056348109b7b538999be6eb4";
+const AZURE_REGION = "westus";
+let selectedVoice = "en-US-AndrewNeural";
+let authToken = null;
+let tokenExpiry = 0;
+
+// Sentences from Fiction 2 - Why Monkeys Live in Trees
+const SENTENCES = [
+  {
+    id: 1,
+    text: "It was the hottest summer anyone could remember.",
+    tip: "注意 hottest 的重音，以及 anyone 的连读",
+    focus: "形容词最高级 + 定语从句"
+  },
+  {
+    id: 2,
+    text: "King Gorilla called all the animals together.",
+    tip: "called all 注意 d 和 a 的连读发音",
+    focus: "过去时叙事句"
+  },
+  {
+    id: 3,
+    text: "I will give a year's supply of food to whoever eats this pile!",
+    tip: "注意 whoever 和 supply 的发音，这是国王宣告的语气",
+    focus: "whoever 引导名词从句"
+  },
+  {
+    id: 4,
+    text: "The hippo waddled up to the pile and gobbled it down in three big mouthfuls.",
+    tip: "waddled 和 gobbled 是生动的动作词，读出夸张感！",
+    focus: "过去式连续动作"
+  },
+  {
+    id: 5,
+    text: "The monkey scratched his head thoughtfully and said, \"I cannot eat it all at once.\"",
+    tip: "thoughtfully 注意三个音节，said 后面语调下降",
+    focus: "副词修饰 + 直接引语"
+  },
+  {
+    id: 6,
+    text: "From that day on, the monkeys have lived safely up in the trees.",
+    tip: "这是故事结尾的总结句，语调平稳，略带余韵",
+    focus: "现在完成时 have lived + 副词短语"
+  },
+];
+
+// ─── Token management ───────────────────────────────────
+async function getToken() {
+  const now = Date.now();
+  if (authToken && now < tokenExpiry) return authToken;
+  
+  const resp = await fetch(
+    `https://${AZURE_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken`,
+    { method: 'POST', headers: { 'Ocp-Apim-Subscription-Key': AZURE_KEY, 'Content-Length': '0' } }
+  );
+  authToken = await resp.text();
+  tokenExpiry = now + 8 * 60 * 1000; // 9-min expiry, refresh at 8
+  return authToken;
+}
+
+// ─── Voice selection ────────────────────────────────────
+function selectVoice(voice, name) {
+  selectedVoice = voice;
+  document.querySelectorAll('.voice-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('v-' + name)?.classList.add('active');
+}
+
+// ─── TTS ────────────────────────────────────────────────
+async function playSentence(sentenceId, text, btn) {
+  btn.disabled = true;
+  const chip = document.getElementById(`status-${sentenceId}`);
+  chip.innerHTML = '<span class="dot"></span> 合成中…';
+  chip.className = 'status-chip loading';
+  chip.style.display = 'inline-flex';
+
+  try {
+    const token = await getToken();
+    const ssml = `<speak version='1.0' xml:lang='en-US'><voice name='${selectedVoice}'><prosody rate='-5%'>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}</prosody></voice></speak>`;
+    
+    const resp = await fetch(
+      `https://${AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/ssml+xml',
+          'X-Microsoft-OutputFormat': 'audio-16khz-128kbitrate-mono-mp3',
+          'User-Agent': 'ReadAloudPractice'
+        },
+        body: ssml
+      }
+    );
+
+    if (!resp.ok) throw new Error('TTS failed: ' + resp.status);
+    
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    
+    chip.innerHTML = '▶ 播放中…';
+    chip.className = 'status-chip loading';
+    
+    audio.play();
+    audio.onended = () => {
+      chip.style.display = 'none';
+      btn.disabled = false;
+    };
+    audio.onerror = () => {
+      chip.style.display = 'none';
+      btn.disabled = false;
+    };
+  } catch(e) {
+    console.error(e);
+    chip.innerHTML = '❌ 错误';
+    chip.style.display = 'inline-flex';
+    setTimeout(() => { chip.style.display = 'none'; btn.disabled = false; }, 2000);
+  }
+}
+
+// ─── Recording state ────────────────────────────────────
+const recState = {};
+
+async function toggleRecord(sentenceId, text, btn) {
+  if (recState[sentenceId]?.active) {
+    // Stop recording
+    stopRecording(sentenceId, text);
+  } else {
+    // Start recording
+    startRecording(sentenceId, text, btn);
+  }
+}
+
+async function startRecording(sentenceId, text, btn) {
+  const card = document.getElementById(`card-${sentenceId}`);
+  const chip = document.getElementById(`status-${sentenceId}`);
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    const chunks = [];
+    
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunks, { type: 'audio/webm' });
+      analyzeRecording(sentenceId, text, blob);
+    };
+    
+    recorder.start();
+    recState[sentenceId] = { active: true, recorder, chunks };
+    
+    btn.innerHTML = '⏹ 停止录音';
+    btn.classList.add('recording');
+    card.classList.add('recording');
+    chip.innerHTML = '<span class="dot"></span> 录音中…';
+    chip.className = 'status-chip recording';
+    chip.style.display = 'inline-flex';
+    
+    // Auto-stop after 15s
+    recState[sentenceId].timeout = setTimeout(() => {
+      if (recState[sentenceId]?.active) stopRecording(sentenceId, text);
+    }, 15000);
+
+  } catch(e) {
+    alert('无法访问麦克风，请检查浏览器权限设置。');
+  }
+}
+
+function stopRecording(sentenceId, text) {
+  const state = recState[sentenceId];
+  if (!state?.active) return;
+  
+  clearTimeout(state.timeout);
+  state.recorder.stop();
+  state.active = false;
+  
+  const btn = document.getElementById(`rec-btn-${sentenceId}`);
+  const card = document.getElementById(`card-${sentenceId}`);
+  const chip = document.getElementById(`status-${sentenceId}`);
+  
+  btn.innerHTML = '🎙 重新录音';
+  btn.classList.remove('recording');
+  btn.disabled = true;
+  card.classList.remove('recording');
+  chip.innerHTML = '<span class="dot"></span> AI评分中…';
+  chip.className = 'status-chip analyzing';
+  chip.style.display = 'inline-flex';
+}
+
+// ─── Pronunciation Assessment ────────────────────────────
+async function analyzeRecording(sentenceId, text, audioBlob) {
+  const chip = document.getElementById(`status-${sentenceId}`);
+  const btn = document.getElementById(`rec-btn-${sentenceId}`);
+  const panel = document.getElementById(`score-${sentenceId}`);
+
+  try {
+    const token = await getToken();
+    
+    // Convert webm to wav-compatible format (send as-is, Azure handles webm)
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    
+    const pronAssessConfig = JSON.stringify({
+      ReferenceText: text,
+      GradingSystem: "HundredMark",
+      Dimension: "Comprehensive",
+      EnableMiscue: true,
+      EnableProsodyAssessment: true
+    });
+    const pronAssessBase64 = btoa(pronAssessConfig);
+    
+    const resp = await fetch(
+      `https://${AZURE_REGION}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?language=en-US&format=detailed`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'audio/webm; codecs=opus',
+          'Pronunciation-Assessment': pronAssessBase64,
+          'Accept': 'application/json'
+        },
+        body: arrayBuffer
+      }
+    );
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(`Assessment failed ${resp.status}: ${errText.slice(0,200)}`);
+    }
+    
+    const result = await resp.json();
+    showScoreResult(sentenceId, text, result);
+
+  } catch(e) {
+    console.error('Assessment error:', e);
+    panel.innerHTML = `<div style="color:var(--red);font-size:0.82rem;">⚠️ 评分出错：${e.message.slice(0,100)}<br><small>请重新录音，确保麦克风清晰。</small></div>`;
+    panel.classList.add('visible');
+  } finally {
+    chip.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function showScoreResult(sentenceId, text, result) {
+  const panel = document.getElementById(`score-${sentenceId}`);
+  
+  const pa = result?.NBest?.[0]?.PronunciationAssessment;
+  if (!pa) {
+    panel.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;">⚠️ 未检测到语音，请确认麦克风并重试。</div>`;
+    panel.classList.add('visible');
+    return;
+  }
+  
+  const acc = Math.round(pa.AccuracyScore || 0);
+  const flu = Math.round(pa.FluencyScore || 0);
+  const comp = Math.round(pa.CompletenessScore || 0);
+  const pros = Math.round(pa.ProsodyScore || 0);
+  const overall = Math.round((acc + flu + comp + pros) / 4);
+  
+  function scoreClass(v) {
+    return v >= 80 ? 'score-good' : v >= 60 ? 'score-ok' : 'score-bad';
+  }
+  
+  // Word-level feedback
+  const words = result?.NBest?.[0]?.Words || [];
+  let wordHTML = '';
+  const issues = [];
+  
+  words.forEach(w => {
+    const wAcc = Math.round(w.PronunciationAssessment?.AccuracyScore || 100);
+    const errType = w.PronunciationAssessment?.ErrorType || 'None';
+    
+    if (errType === 'Omission') {
+      wordHTML += `<span class="word-chip word-err" title="漏读">✗ ${w.Word}</span>`;
+      issues.push(`「${w.Word}」被漏读了`);
+    } else if (errType === 'Insertion') {
+      wordHTML += `<span class="word-chip word-warn" title="多读">+ ${w.Word}</span>`;
+      issues.push(`「${w.Word}」是多读的词`);
+    } else if (wAcc < 60) {
+      wordHTML += `<span class="word-chip word-err" title="发音有误 ${wAcc}分">${w.Word} <small>${wAcc}</small></span>`;
+      issues.push(`「${w.Word}」发音需要改进（${wAcc}分）`);
+    } else if (wAcc < 80) {
+      wordHTML += `<span class="word-chip word-warn" title="发音较弱 ${wAcc}分">${w.Word} <small>${wAcc}</small></span>`;
+    } else {
+      wordHTML += `<span class="word-chip word-ok">${w.Word}</span>`;
+    }
+  });
+  
+  // Generate feedback note
+  let feedbackNote = '';
+  if (overall >= 85) {
+    feedbackNote = '🎉 非常棒！发音准确流利，继续保持！';
+  } else if (issues.length > 0) {
+    feedbackNote = '💡 需要改进：' + issues.slice(0, 3).join('；') + '。建议先听范读，模仿后再录音。';
+  } else if (flu < 70) {
+    feedbackNote = '💡 发音准确但节奏略慢，试着更流畅地连读整句。';
+  } else {
+    feedbackNote = '👍 不错！继续练习可以提高准确度。';
+  }
+  
+  panel.innerHTML = `
+    <div class="section-title" style="margin-bottom:10px;">📊 发音评分结果</div>
+    <div class="score-row">
+      <div class="score-badge">
+        <div class="val ${scoreClass(acc)}">${acc}</div>
+        <div class="lbl">准确度</div>
+      </div>
+      <div class="score-badge">
+        <div class="val ${scoreClass(flu)}">${flu}</div>
+        <div class="lbl">流利度</div>
+      </div>
+      <div class="score-badge">
+        <div class="val ${scoreClass(comp)}">${comp}</div>
+        <div class="lbl">完整度</div>
+      </div>
+      <div class="score-badge">
+        <div class="val ${scoreClass(pros)}">${pros}</div>
+        <div class="lbl">韵律</div>
+      </div>
+      <div class="score-badge" style="background:rgba(108,143,255,0.1);border-color:var(--accent)">
+        <div class="val ${scoreClass(overall)}" style="font-size:1.6rem;">${overall}</div>
+        <div class="lbl" style="color:var(--accent)">综合</div>
+      </div>
+    </div>
+    <div class="section-title">逐词分析</div>
+    <div class="word-feedback" style="margin-bottom:10px;">${wordHTML || '<span style="color:var(--text-muted)">未识别到单词</span>'}</div>
+    <div class="feedback-note">${feedbackNote}</div>
+  `;
+  panel.classList.add('visible');
+}
+
+// ─── Render ──────────────────────────────────────────────
+function render() {
+  const container = document.getElementById('sentences-container');
+  container.innerHTML = SENTENCES.map(s => `
+    <div class="sentence-card" id="card-${s.id}">
+      <div class="sentence-num">句子 ${s.id} · ${s.focus}</div>
+      <div class="sentence-text">"${s.text}"</div>
+      <div class="sentence-tip">💡 ${s.tip}</div>
+      <div class="controls">
+        <button class="btn btn-play" onclick="playSentence(${s.id}, ${JSON.stringify(s.text)}, this)">
+          ▶ 听范读
+        </button>
+        <button class="btn btn-record" id="rec-btn-${s.id}"
+          onclick="toggleRecord(${s.id}, ${JSON.stringify(s.text)}, this)">
+          🎙 开始录音
+        </button>
+        <span class="status-chip" id="status-${s.id}" style="display:none;"></span>
+      </div>
+      <div class="score-panel" id="score-${s.id}"></div>
+    </div>
+  `).join('');
+}
+
+render();
+</script>
+</body>
+</html>
