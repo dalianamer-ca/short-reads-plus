@@ -692,24 +692,60 @@ function showScoreResult(sentenceId, text, result) {
 // ─── Render ──────────────────────────────────────────────
 function render() {
   const container = document.getElementById('sentences-container');
-  container.innerHTML = SENTENCES.map(s => `
-    <div class="sentence-card" id="card-${s.id}">
-      <div class="sentence-num">句子 ${s.id} · ${s.focus}</div>
-      <div class="sentence-text">"${s.text}"</div>
-      <div class="sentence-tip">💡 ${s.tip}</div>
-      <div class="controls">
-        <button class="btn btn-play" onclick="playSentence(${s.id}, ${JSON.stringify(s.text)}, this)">
-          ▶ 听范读
-        </button>
-        <button class="btn btn-record" id="rec-btn-${s.id}"
-          onclick="toggleRecord(${s.id}, ${JSON.stringify(s.text)}, this)">
-          🎙 开始录音
-        </button>
-        <span class="status-chip" id="status-${s.id}" style="display:none;"></span>
-      </div>
-      <div class="score-panel" id="score-${s.id}"></div>
-    </div>
-  `).join('');
+  container.innerHTML = '';
+
+  SENTENCES.forEach(s => {
+    // Build card with DOM methods to avoid innerHTML onclick quoting issues
+    const card = document.createElement('div');
+    card.className = 'sentence-card';
+    card.id = 'card-' + s.id;
+
+    const num = document.createElement('div');
+    num.className = 'sentence-num';
+    num.textContent = '句子 ' + s.id + ' · ' + s.focus;
+
+    const txt = document.createElement('div');
+    txt.className = 'sentence-text';
+    txt.textContent = '\u201c' + s.text + '\u201d';
+
+    const tip = document.createElement('div');
+    tip.className = 'sentence-tip';
+    tip.textContent = '\uD83D\uDCA1 ' + s.tip;
+
+    const controls = document.createElement('div');
+    controls.className = 'controls';
+
+    const playBtn = document.createElement('button');
+    playBtn.className = 'btn btn-play';
+    playBtn.innerHTML = '\u25B6 听范读';
+    playBtn.addEventListener('click', function() { playSentence(s.id, s.text, this); });
+
+    const recBtn = document.createElement('button');
+    recBtn.className = 'btn btn-record';
+    recBtn.id = 'rec-btn-' + s.id;
+    recBtn.innerHTML = '\uD83C\uDF99 开始录音';
+    recBtn.addEventListener('click', function() { toggleRecord(s.id, s.text, this); });
+
+    const chip = document.createElement('span');
+    chip.className = 'status-chip';
+    chip.id = 'status-' + s.id;
+    chip.style.display = 'none';
+
+    controls.appendChild(playBtn);
+    controls.appendChild(recBtn);
+    controls.appendChild(chip);
+
+    const scorePanel = document.createElement('div');
+    scorePanel.className = 'score-panel';
+    scorePanel.id = 'score-' + s.id;
+
+    card.appendChild(num);
+    card.appendChild(txt);
+    card.appendChild(tip);
+    card.appendChild(controls);
+    card.appendChild(scorePanel);
+    container.appendChild(card);
+  });
 }
 
 
