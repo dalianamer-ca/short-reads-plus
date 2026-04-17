@@ -486,11 +486,27 @@ async function toggleRecord(sentenceId, text, btn) {
 }
 
 async function startRecording(sentenceId, text, btn) {
+  // Pre-check: verify browser has mic permission
+  if (navigator.permissions) {
+    try {
+      const perm = await navigator.permissions.query({ name: 'microphone' });
+      if (perm.state === 'denied') {
+        alert('❌ 麦克风权限被浏览器拒绝。\n\n请点击浏览器地址栏左侧的锁图标 🔒，将麦克风权限改为"允许"，然后刷新页面。');
+        return;
+      }
+    } catch(e) { /* permissions API not supported, continue */ }
+  }
   const card = document.getElementById(`card-${sentenceId}`);
   const chip = document.getElementById(`status-${sentenceId}`);
 
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      audio: { 
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 16000  // Azure STT prefers 16kHz
+      } 
+    });
     const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
       ? 'audio/webm;codecs=opus' 
       : MediaRecorder.isTypeSupported('audio/webm') 
@@ -523,7 +539,13 @@ async function startRecording(sentenceId, text, btn) {
     }, 15000);
 
   } catch(e) {
-    alert('无法访问麦克风，请检查浏览器权限设置。');
+    const msg = e.name === 'NotAllowedError' 
+      ? '❌ 麦克风权限被拒绝\n\n请检查：\n① Windows 设置 → 隐私 → 麦克风 → 允许应用访问麦克风\n② 浏览器地址栏左侧的锁图标 → 允许麦克风'
+      : e.name === 'NotFoundError'
+      ? '❌ 未检测到麦克风设备，请检查连接'
+      : '❌ 麦克风错误：' + e.message;
+    alert(msg);
+    console.error('Mic error:', e.name, e.message);
   }
 }
 
@@ -606,7 +628,12 @@ function showScoreResult(sentenceId, text, result) {
   
   const pa = result?.NBest?.[0]?.PronunciationAssessment;
   if (!pa) {
-    panel.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;">⚠️ 未检测到语音，请确认麦克风并重试。</div>`;
+    const status = result?.RecognitionStatus || 'Unknown';
+    let hint = '⚠️ 未检测到语音。';
+    if (status === 'NoMatch') hint += ' 请靠近麦克风，大声清晰地朗读句子后再试。';
+    else if (status === 'InitialSilenceTimeout') hint += ' 录音开始后请立即说话，不要等待。';
+    else hint += ` (状态: ${status})`;
+    panel.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;">${hint}</div>`;
     panel.classList.add('visible');
     return;
   }
