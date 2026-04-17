@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎧 Read Aloud Practice — Fiction 2</title>
+<title>🎧 Read Aloud Practice</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
@@ -405,7 +405,7 @@ async function getToken() {
   
   const resp = await fetch(
     `https://${AZURE_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken`,
-    { method: 'POST', headers: { 'Ocp-Apim-Subscription-Key': AZURE_KEY, 'Content-Length': '0' } }
+    { method: 'POST', headers: { 'Ocp-Apim-Subscription-Key': AZURE_KEY } }
   );
   authToken = await resp.text();
   tokenExpiry = now + 8 * 60 * 1000; // 9-min expiry, refresh at 8
@@ -454,7 +454,7 @@ async function playSentence(sentenceId, text, btn) {
     chip.innerHTML = '▶ 播放中…';
     chip.className = 'status-chip loading';
     
-    audio.play();
+    audio.play().catch(e => console.error('Autoplay blocked:', e));
     audio.onended = () => {
       chip.style.display = 'none';
       btn.disabled = false;
@@ -464,10 +464,11 @@ async function playSentence(sentenceId, text, btn) {
       btn.disabled = false;
     };
   } catch(e) {
-    console.error(e);
-    chip.innerHTML = '❌ 错误';
+    console.error('TTS Error:', e);
+    chip.innerHTML = '❌ ' + (e.message || '请求失败');
+    chip.className = 'status-chip recording';
     chip.style.display = 'inline-flex';
-    setTimeout(() => { chip.style.display = 'none'; btn.disabled = false; }, 2000);
+    setTimeout(() => { chip.style.display = 'none'; btn.disabled = false; }, 4000);
   }
 }
 
@@ -490,7 +491,13 @@ async function startRecording(sentenceId, text, btn) {
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+      ? 'audio/webm;codecs=opus' 
+      : MediaRecorder.isTypeSupported('audio/webm') 
+        ? 'audio/webm' 
+        : '';
+    const recOptions = mimeType ? { mimeType } : {};
+    const recorder = new MediaRecorder(stream, recOptions);
     const chunks = [];
     
     recorder.ondataavailable = e => chunks.push(e.data);
@@ -501,7 +508,7 @@ async function startRecording(sentenceId, text, btn) {
     };
     
     recorder.start();
-    recState[sentenceId] = { active: true, recorder, chunks };
+    recState[sentenceId] = { active: true, recorder, chunks, mimeType: mimeType || 'audio/webm' };
     
     btn.innerHTML = '⏹ 停止录音';
     btn.classList.add('recording');
@@ -568,7 +575,7 @@ async function analyzeRecording(sentenceId, text, audioBlob) {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + token,
-          'Content-Type': 'audio/webm; codecs=opus',
+          'Content-Type': recState[sentenceId]?.mimeType || 'audio/webm',
           'Pronunciation-Assessment': pronAssessBase64,
           'Accept': 'application/json'
         },
@@ -704,6 +711,24 @@ function render() {
     </div>
   `).join('');
 }
+
+
+// ─── Startup connectivity test ───────────────────────────
+window.addEventListener('load', async () => {
+  try {
+    const resp = await fetch(
+      `https://${AZURE_REGION}.api.cognitive.microsoft.com/sts/v1.0/issueToken`,
+      { method: 'POST', headers: { 'Ocp-Apim-Subscription-Key': AZURE_KEY } }
+    );
+    if (resp.ok) {
+      console.log('✅ Azure Speech Service connected');
+    } else {
+      console.warn('⚠️ Azure token failed:', resp.status);
+    }
+  } catch(e) {
+    console.error('❌ Azure connection error:', e.message);
+  }
+});
 
 render();
 </script>
