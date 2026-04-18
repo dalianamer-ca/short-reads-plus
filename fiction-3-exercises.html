@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiction 3 · The Great Noise — Interactive Exercises</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh}
+header{background:linear-gradient(135deg,#1d4ed8,#3b82f6);color:#fff;padding:16px 20px}
+header h1{font-size:18px;font-weight:700}
+header p{font-size:13px;opacity:.85;margin-top:3px}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;overflow-x:auto;flex-wrap:nowrap}
+.tab-btn{flex:1;min-width:90px;padding:11px 8px;font-size:12px;font-weight:600;color:#64748b;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:.2s}
+.tab-btn.active{color:#2563eb;border-bottom-color:#2563eb}
+.tab-btn:hover:not(.active){background:#f8fafc}
+.panel{display:none;padding:16px;max-width:800px;margin:0 auto}
+.panel.active{display:block}
+.panel-title{font-size:16px;font-weight:700;color:#1e293b;margin-bottom:4px}
+.panel-sub{font-size:12px;color:#64748b;margin-bottom:16px}
+.group-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.group-title{font-size:12px;font-weight:700;color:#2563eb;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.word-bank{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding:10px;background:#eff6ff;border-radius:8px}
+.wb-badge{padding:4px 10px;background:#dbeafe;color:#1d4ed8;border-radius:20px;font-size:12px;font-weight:600}
+.sentence-row{margin-bottom:10px}
+.sentence-text{font-size:14px;color:#374151;line-height:1.6;margin-bottom:4px}
+.blank-input{border:2px solid #cbd5e1;border-radius:6px;padding:4px 8px;font-size:13px;width:140px;outline:none;transition:.2s}
+.blank-input:focus{border-color:#3b82f6}
+.blank-input.correct{border-color:#16a34a;background:#f0fdf4;color:#15803d}
+.blank-input.wrong{border-color:#dc2626;background:#fef2f2;color:#dc2626}
+.hint-text{font-size:11px;color:#6b7280;margin-left:6px}
+.check-btn{margin-top:10px;padding:7px 18px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.check-btn:hover{background:#2563eb}
+.reset-btn{padding:7px 18px;background:#e2e8f0;color:#475569;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-left:8px;transition:.15s}
+.reset-btn:hover{background:#cbd5e1}
+.group-score{font-size:12px;color:#64748b;margin-top:8px;font-weight:600}
+/* Sentence Reconstruction */
+.reco-card{background:#fff;border-radius:10px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.reco-num{font-size:12px;font-weight:700;color:#7c3aed;margin-bottom:8px}
+.word-pool{display:flex;flex-wrap:wrap;gap:6px;min-height:42px;padding:8px;border:2px dashed #cbd5e1;border-radius:8px;margin-bottom:8px;background:#f8fafc}
+.answer-zone{display:flex;flex-wrap:wrap;gap:6px;min-height:42px;padding:8px;border:2px dashed #93c5fd;border-radius:8px;margin-bottom:8px;background:#eff6ff}
+.word-tile{padding:5px 10px;background:#e0e7ff;color:#3730a3;border-radius:6px;font-size:13px;font-weight:600;cursor:grab;user-select:none;border:2px solid transparent;transition:.15s}
+.word-tile:hover{border-color:#6366f1;background:#c7d2fe}
+.word-tile.dragging{opacity:.5}
+.word-tile.selected{border-color:#2563eb;background:#bfdbfe}
+.reco-feedback{font-size:13px;margin-top:6px;padding:6px 10px;border-radius:6px;display:none}
+.reco-feedback.correct{background:#dcfce7;color:#15803d;display:block}
+.reco-feedback.wrong{background:#fee2e2;color:#b91c1c;display:block}
+/* Spelling */
+.spell-card{background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.spell-num{font-size:12px;font-weight:700;color:#0f766e;min-width:20px}
+.spell-hint{flex:1;min-width:200px}
+.phonetic{font-size:15px;font-family:'Courier New',monospace;color:#0f766e;font-weight:700;margin-bottom:2px}
+.zh-hint{font-size:12px;color:#6b7280}
+.spell-input{border:2px solid #cbd5e1;border-radius:6px;padding:6px 10px;font-size:14px;width:160px;outline:none;transition:.2s}
+.spell-input:focus{border-color:#14b8a6}
+.spell-input.correct{border-color:#16a34a;background:#f0fdf4;color:#15803d}
+.spell-input.wrong{border-color:#dc2626;background:#fef2f2;color:#dc2626}
+.spell-ans{font-size:12px;color:#6b7280;margin-left:4px;min-width:80px}
+/* Synonym Matching */
+#match-wrapper{position:relative;background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+#match-container{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative}
+#match-left,#match-right{display:flex;flex-direction:column;gap:8px;z-index:1;flex:1}
+.match-item{padding:8px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;transition:.15s;white-space:nowrap;text-align:center}
+.match-item:hover{border-color:#3b82f6;background:#eff6ff}
+.match-item.selected{border-color:#2563eb;background:#dbeafe;color:#1d4ed8}
+.match-item.matched-correct{border-color:#16a34a;background:#dcfce7;color:#15803d;cursor:default}
+.match-item.matched-wrong{border-color:#dc2626;background:#fee2e2;color:#b91c1c}
+#match-svg{position:absolute;top:0;left:0;pointer-events:none;z-index:0}
+.match-actions{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+/* Score panel */
+.score-card{background:#fff;border-radius:10px;padding:20px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.score-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9}
+.score-row:last-child{border-bottom:none}
+.score-label{font-size:14px;font-weight:600;color:#374151}
+.score-val{font-size:14px;font-weight:700;color:#2563eb}
+.score-bar-wrap{flex:1;height:8px;background:#e2e8f0;border-radius:4px;margin:0 16px;overflow:hidden}
+.score-bar{height:100%;background:#3b82f6;border-radius:4px;transition:.5s}
+.total-row{background:#eff6ff;border-radius:8px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.total-label{font-size:16px;font-weight:700;color:#1d4ed8}
+.total-val{font-size:24px;font-weight:800;color:#1d4ed8}
+.reset-all-btn{display:block;margin:20px auto 0;padding:10px 30px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
+.reset-all-btn:hover{background:#dc2626}
+@media(max-width:520px){
+  .spell-card{gap:8px}
+  .spell-input{width:130px}
+  .tab-btn{font-size:11px;padding:10px 4px;min-width:68px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>📝 Interactive Exercises</h1>
+  <p>Fiction 3 · The Great Noise &nbsp;|&nbsp; Level 7 · GRL Q · 610L</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" id="tb1">1. Fill in Blank</button>
+  <button class="tab-btn" id="tb2">2. Sentence Reco.</button>
+  <button class="tab-btn" id="tb3">3. Spelling</button>
+  <button class="tab-btn" id="tb4">4. Synonyms</button>
+  <button class="tab-btn" id="tb5">5. Scores</button>
+</nav>
+
+<main>
+  <section class="panel active" id="panel1">
+    <div class="panel-title">Fill in the Blank</div>
+    <div class="panel-sub">Choose the correct word or phrase. You may need to change the form of the word.</div>
+    <div id="fill-content"></div>
+  </section>
+
+  <section class="panel" id="panel2">
+    <div class="panel-title">Sentence Reconstruction</div>
+    <div class="panel-sub">Drag the word tiles into the correct order. On mobile: tap a tile, then tap the answer zone.</div>
+    <div id="reco-content"></div>
+  </section>
+
+  <section class="panel" id="panel3">
+    <div class="panel-title">Spelling</div>
+    <div class="panel-sub">Use the phonetic transcription and Chinese hint to spell the word correctly.</div>
+    <div id="spell-content"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="check-btn" id="spell-check-all">Check All</button>
+      <button class="reset-btn" id="spell-reset">Reset</button>
+    </div>
+  </section>
+
+  <section class="panel" id="panel4">
+    <div class="panel-title">Synonym Matching</div>
+    <div class="panel-sub">Click a word on the left, then click its synonym on the right to connect them.</div>
+    <div id="match-wrapper">
+      <div id="match-container">
+        <div id="match-left"></div>
+        <svg id="match-svg" width="40" height="400"></svg>
+        <div id="match-right"></div>
+      </div>
+    </div>
+    <div class="match-actions">
+      <button class="check-btn" id="match-check">Check Answers</button>
+      <button class="reset-btn" id="match-reset">Reset</button>
+    </div>
+  </section>
+
+  <section class="panel" id="panel5">
+    <div class="panel-title">Score Summary</div>
+    <div class="panel-sub">Your results so far. Complete all exercises to see your total.</div>
+    <div id="score-content"></div>
+    <button class="reset-all-btn" id="reset-all">Reset All Exercises</button>
+  </section>
+</main>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+var FILL_GROUPS = [
+  {
+    bank: ["fed up", "wary", "afford", "belly"],
+    items: [
+      { b: "After waiting for two hours, Mia was completely ", a: " with the delay.", ans: "fed up" },
+      { b: "The cat was ", a: " of the new dog and stayed close to the door.", ans: "wary" },
+      { b: "We can't ", a: " to waste any more time — the train leaves soon!", ans: "afford" },
+      { b: "The tired puppy rolled over and let the child rub its soft ", a: ".", ans: "belly" }
+    ]
+  },
+  {
+    bank: ["flamsak", "joob", "shudder", "gape"],
+    items: [
+      { b: "Stig was a ", a: ", a creature with many legs that lived near the stream.", ans: "joob" },
+      { b: "A ", a: " lurked at the bottom of the waterhole, ready to grab any creature.", ans: "flamsak" },
+      { b: "He couldn't help but ", a: " at the thought of jumping off the high diving board.", ans: "shudder" },
+      { b: "The tourists began to ", a: " in amazement as the dolphin leapt out of the sea.", ans: "gape" }
+    ]
+  },
+  {
+    bank: ["hurled", "gully", "fell silent", "screeched"],
+    items: [
+      { b: "The heavy rain carved a deep ", a: " into the soft hillside overnight.", ans: "gully" },
+      { b: "She ", a: " the ball across the court with all her strength.", ans: "hurled" },
+      { b: "The whole audience ", a: " the moment the singer walked onto the stage.", ans: "fell silent" },
+      { b: "The bus ", a: " to a halt at the red light, and passengers lurched forward.", ans: "screeched" }
+    ]
+  },
+  {
+    bank: ["hurtled", "tackle", "a trickle of", "baffled"],
+    items: [
+      { b: "Detectives were ", a: " by the case — none of the clues seemed to fit together.", ans: "baffled" },
+      { b: "The racing car ", a: " around the final bend and crossed the finish line.", ans: "hurtled" },
+      { b: "There was only ", a: " water left at the bottom of the bottle.", ans: "a trickle of" },
+      { b: "You have to be brave if you want to ", a: " your biggest fear.", ans: "tackle" }
+    ]
+  },
+  {
+    bank: ["drenching", "drought", "swished", "gurgled"],
+    items: [
+      { b: "The long ", a: " had dried up most of the rivers and cracked the soil.", ans: "drought" },
+      { b: "Water ", a: " quietly through the narrow pipes beneath the kitchen floor.", ans: "gurgled" },
+      { b: "We were caught in a ", a: " downpour on the way home without an umbrella.", ans: "drenching" },
+      { b: "The princess's long silk dress ", a: " softly as she walked down the staircase.", ans: "swished" }
+    ]
+  },
+  {
+    bank: ["faint", "sank", "crawling", "afterwards"],
+    items: [
+      { b: "Taking a deep breath, he ", a: " into the cool swimming pool with relief.", ans: "sank" },
+      { b: "She was almost ", a: " with excitement when she opened the letter.", ans: "faint" },
+      { b: "The injured hiker was ", a: " on hands and knees along the rocky path.", ans: "crawling" },
+      { b: "She wasn't hungry during the match, but ", a: " she ate three sandwiches.", ans: "afterwards" }
+    ]
+  }
+];
+
+var RECO_ITEMS = [
+  { words: ["Stig", "was", "tired,", "hungry", "and", "fed", "up."], ans: "Stig was tired, hungry and fed up." },
+  { words: ["grows", "and", "It", "grows", "if", "you", "let", "it."], ans: "It grows and grows if you let it." },
+  { words: ["herself", "down", "She", "hurled", "the", "gully,", "roaring", "all", "the", "way."], ans: "She hurled herself down the gully, roaring all the way." },
+  { words: ["a", "deep", "breath,", "she", "sank", "Taking", "deeply", "into", "the", "river."], ans: "Taking a deep breath, she sank deeply into the river." },
+  { words: ["It", "swished,", "it", "gurgled", "and", "it", "roared."], ans: "It swished, it gurgled and it roared." }
+];
+
+var SPELL_ITEMS = [
+  { ph: "/\u02c8w\u025bri/", zh: "\u8b66\u60d5\u7684\u3001\u8c28\u614e\u7684", ans: "wary" },
+  { ph: "/\u02c8b\u025bli/", zh: "\u8098\u5b50\u3001\u8179\u90e8", ans: "belly" },
+  { ph: "/\u02c8\u0261\u028cli/", zh: "\u51b2\u6c9f\u3001\u5ce1\u8c37", ans: "gully" },
+  { ph: "/\u02c8\u0283\u028cd\u0259r/", zh: "\u56e0\u6050\u60e7\u800c\u98a4\u6296", ans: "shudder" },
+  { ph: "/\u02c8h\u025c\u02d0rt\u0259l/", zh: "\u731b\u51b2\u3001\u9ad8\u901f\u79fb\u52a8", ans: "hurtle" },
+  { ph: "/\u02c8b\u00e6f\u0259l/", zh: "\u4f7f\u56f0\u60d1\u3001\u4f7f\u8ff7\u60d1", ans: "baffle" },
+  { ph: "/dra\u028at/", zh: "\u5e72\u65f1\u3001\u65f1\u707e\uff08\u6ce8\u610f\uff1a-ght\u4e0d\u53d1\u97f3\uff09", ans: "drought" },
+  { ph: "/\u02c8\u0261\u025c\u02d0r\u0261\u0259l/", zh: "\u53d1\u51fa\u548f\u548f\u6d41\u6c34\u58f0", ans: "gurgle" },
+  { ph: "/\u02c8t\u00e6k\u0259l/", zh: "\u5bf9\u4ed8\u3001\u5904\u7406\uff08\u95ee\u9898\u6216\u6311\u6218\uff09", ans: "tackle" },
+  { ph: "/\u02c8\u00e6ft\u0259rw\u0259rdz/", zh: "\u4e4b\u540e\u3001\u540e\u6765", ans: "afterwards" }
+];
+
+var MATCH_WORDS = ["fed up","wary","hurl","shudder","hurtle","tackle","baffle","drenching","faint","gape"];
+var MATCH_SYNS_ORD = ["sick of","cautious","fling","quiver","zoom","deal with","perplex","soaking","overwhelmed","stare open-mouthed"];
+var MATCH_SYNS = ["sick of","cautious","fling","quiver","zoom","deal with","perplex","soaking","overwhelmed","stare open-mouthed"];
+// shuffled order for display
+var MATCH_SYNS_DISPLAY = ["quiver","deal with","stare open-mouthed","soaking","fling","perplex","sick of","cautious","zoom","overwhelmed"];
+
+// ── SCORES ───────────────────────────────────────────────────────────────────
+var fillScores = [0,0,0,0,0,0];  // correct per group
+var fillTotals = [4,4,4,4,4,4];
+var recoScores = [false,false,false,false,false];
+var spellScores = [];
+var matchScore = 0;
+
+// ── UTILITIES ─────────────────────────────────────────────────────────────────
+function norm(s){ return s.trim().toLowerCase().replace(/\s+/g,' '); }
+
+function makeId(s){ return s.replace(/[^a-z0-9]/gi,'_'); }
+
+function switchTab(n){
+  ['panel1','panel2','panel3','panel4','panel5'].forEach(function(id,i){
+    document.getElementById(id).classList.toggle('active', i+1===n);
+  });
+  ['tb1','tb2','tb3','tb4','tb5'].forEach(function(id,i){
+    document.getElementById(id).classList.toggle('active', i+1===n);
+  });
+  if(n===4) resizeSvg();
+  if(n===5) renderScores();
+}
+document.getElementById('tb1').addEventListener('click',function(){switchTab(1);});
+document.getElementById('tb2').addEventListener('click',function(){switchTab(2);});
+document.getElementById('tb3').addEventListener('click',function(){switchTab(3);});
+document.getElementById('tb4').addEventListener('click',function(){switchTab(4);});
+document.getElementById('tb5').addEventListener('click',function(){switchTab(5);});
+
+// ── TAB 1: FILL IN BLANK ─────────────────────────────────────────────────────
+(function(){
+  var cont = document.getElementById('fill-content');
+  FILL_GROUPS.forEach(function(grp, gi){
+    var card = document.createElement('div');
+    card.className = 'group-card';
+
+    var title = document.createElement('div');
+    title.className = 'group-title';
+    title.textContent = 'Group ' + (gi+1);
+    card.appendChild(title);
+
+    var wb = document.createElement('div');
+    wb.className = 'word-bank';
+    grp.bank.forEach(function(w){
+      var b = document.createElement('span');
+      b.className = 'wb-badge';
+      b.textContent = w;
+      wb.appendChild(b);
+    });
+    card.appendChild(wb);
+
+    grp.items.forEach(function(item, si){
+      var row = document.createElement('div');
+      row.className = 'sentence-row';
+      var txt = document.createElement('div');
+      txt.className = 'sentence-text';
+
+      var s1 = document.createElement('span');
+      s1.textContent = (si+1) + '.  ' + item.b;
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.className = 'blank-input';
+      inp.id = 'fill_' + gi + '_' + si;
+      inp.placeholder = '...';
+      var s2 = document.createElement('span');
+      s2.textContent = item.a;
+
+      txt.appendChild(s1);
+      txt.appendChild(inp);
+      txt.appendChild(s2);
+      row.appendChild(txt);
+      card.appendChild(row);
+    });
+
+    var btnRow = document.createElement('div');
+    btnRow.style.marginTop = '10px';
+    btnRow.style.display = 'flex';
+    btnRow.style.alignItems = 'center';
+    btnRow.style.gap = '10px';
+    btnRow.style.flexWrap = 'wrap';
+
+    var btn = document.createElement('button');
+    btn.className = 'check-btn';
+    btn.textContent = 'Check Group ' + (gi+1);
+    var scoreEl = document.createElement('div');
+    scoreEl.className = 'group-score';
+    scoreEl.id = 'fill-score-' + gi;
+
+    btn.addEventListener('click', function(){
+      var correct = 0;
+      grp.items.forEach(function(item, si){
+        var inp = document.getElementById('fill_' + gi + '_' + si);
+        if(norm(inp.value) === norm(item.ans)){
+          inp.classList.remove('wrong'); inp.classList.add('correct');
+          correct++;
+        } else {
+          inp.classList.remove('correct'); inp.classList.add('wrong');
+          if(inp.value.trim()==='') inp.value = item.ans;
+        }
+      });
+      fillScores[gi] = correct;
+      scoreEl.textContent = correct + ' / ' + grp.items.length + ' correct';
+    });
+
+    var resetBtn = document.createElement('button');
+    resetBtn.className = 'reset-btn';
+    resetBtn.textContent = 'Reset';
+    resetBtn.addEventListener('click', function(){
+      grp.items.forEach(function(item, si){
+        var inp = document.getElementById('fill_' + gi + '_' + si);
+        inp.value = ''; inp.classList.remove('correct','wrong');
+      });
+      fillScores[gi] = 0;
+      scoreEl.textContent = '';
+    });
+
+    btnRow.appendChild(btn);
+    btnRow.appendChild(resetBtn);
+    btnRow.appendChild(scoreEl);
+    card.appendChild(btnRow);
+    cont.appendChild(card);
+  });
+})();
+
+// ── TAB 2: SENTENCE RECONSTRUCTION ──────────────────────────────────────────
+(function(){
+  var cont = document.getElementById('reco-content');
+  var mobileSel = null; // for tap-to-place on mobile
+
+  RECO_ITEMS.forEach(function(item, ri){
+    var card = document.createElement('div');
+    card.className = 'reco-card';
+
+    var num = document.createElement('div');
+    num.className = 'reco-num';
+    num.textContent = 'Sentence ' + (ri+1);
+    card.appendChild(num);
+
+    // Shuffle words
+    var shuffled = item.words.slice().sort(function(){return Math.random()-.5;});
+
+    var pool = document.createElement('div');
+    pool.className = 'word-pool';
+    pool.id = 'pool_' + ri;
+
+    var zone = document.createElement('div');
+    zone.className = 'answer-zone';
+    zone.id = 'zone_' + ri;
+
+    shuffled.forEach(function(w, wi){
+      var tile = document.createElement('span');
+      tile.className = 'word-tile';
+      tile.textContent = w;
+      tile.draggable = true;
+      tile.dataset.word = w;
+      tile.dataset.src = 'pool';
+
+      tile.addEventListener('dragstart', function(e){
+        e.dataTransfer.setData('text/plain', ri + '|' + w + '|' + tile.dataset.src);
+        tile.classList.add('dragging');
+      });
+      tile.addEventListener('dragend', function(){
+        tile.classList.remove('dragging');
+      });
+
+      // Mobile tap
+      tile.addEventListener('click', function(){
+        if(mobileSel === tile){
+          tile.classList.remove('selected');
+          mobileSel = null;
+          return;
+        }
+        if(mobileSel){
+          // move mobileSel to this tile's container, then swap
+          var src = mobileSel.dataset.src;
+          var dest = tile.dataset.src;
+          if(src !== dest){
+            mobileSel.dataset.src = dest;
+            tile.parentNode.appendChild(mobileSel);
+          }
+          mobileSel.classList.remove('selected');
+          mobileSel = null;
+          return;
+        }
+        mobileSel = tile;
+        tile.classList.add('selected');
+      });
+
+      pool.appendChild(tile);
+    });
+
+    function setupDrop(el, srcName){
+      el.addEventListener('dragover', function(e){ e.preventDefault(); });
+      el.addEventListener('drop', function(e){
+        e.preventDefault();
+        var data = e.dataTransfer.getData('text/plain').split('|');
+        var rIdx = parseInt(data[0]);
+        if(rIdx !== ri) return;
+        var word = data[1];
+        // find tile
+        var tiles = document.querySelectorAll('.word-tile');
+        tiles.forEach(function(t){
+          if(t.dataset.word === word && t.closest('[id]') && (t.parentNode.id === 'pool_'+rIdx || t.parentNode.id === 'zone_'+rIdx)){
+            t.dataset.src = srcName;
+            el.appendChild(t);
+          }
+        });
+      });
+    }
+    setupDrop(zone, 'zone');
+    setupDrop(pool, 'pool');
+
+    var zoneLabel = document.createElement('div');
+    zoneLabel.style.cssText = 'font-size:11px;color:#94a3b8;margin-bottom:4px';
+    zoneLabel.textContent = 'Your answer:';
+    var poolLabel = document.createElement('div');
+    poolLabel.style.cssText = 'font-size:11px;color:#94a3b8;margin-bottom:4px;margin-top:8px';
+    poolLabel.textContent = 'Word bank:';
+
+    var fbk = document.createElement('div');
+    fbk.className = 'reco-feedback';
+    fbk.id = 'reco-fb-' + ri;
+
+    var btnRow = document.createElement('div');
+    btnRow.style.display = 'flex'; btnRow.style.gap = '8px'; btnRow.style.flexWrap = 'wrap';
+
+    var checkBtn = document.createElement('button');
+    checkBtn.className = 'check-btn';
+    checkBtn.textContent = 'Check';
+    checkBtn.addEventListener('click', function(){
+      var zoneTiles = document.getElementById('zone_'+ri).querySelectorAll('.word-tile');
+      var answer = [];
+      zoneTiles.forEach(function(t){ answer.push(t.textContent); });
+      var answerStr = answer.join(' ');
+      var correct = (answerStr.trim() === item.ans.trim());
+      recoScores[ri] = correct;
+      fbk.className = 'reco-feedback ' + (correct ? 'correct' : 'wrong');
+      fbk.textContent = correct ? 'Correct!' : 'Not quite. Answer: ' + item.ans;
+    });
+
+    var resetBtn = document.createElement('button');
+    resetBtn.className = 'reset-btn';
+    resetBtn.textContent = 'Reset';
+    resetBtn.addEventListener('click', function(){
+      var poolEl = document.getElementById('pool_'+ri);
+      var zoneEl = document.getElementById('zone_'+ri);
+      var allTiles = Array.from(zoneEl.querySelectorAll('.word-tile'));
+      allTiles.forEach(function(t){ t.dataset.src='pool'; poolEl.appendChild(t); });
+      fbk.className = 'reco-feedback';
+      recoScores[ri] = false;
+    });
+
+    btnRow.appendChild(checkBtn);
+    btnRow.appendChild(resetBtn);
+
+    card.appendChild(zoneLabel);
+    card.appendChild(zone);
+    card.appendChild(fbk);
+    card.appendChild(poolLabel);
+    card.appendChild(pool);
+    card.appendChild(btnRow);
+    cont.appendChild(card);
+  });
+})();
+
+// ── TAB 3: SPELLING ──────────────────────────────────────────────────────────
+(function(){
+  var cont = document.getElementById('spell-content');
+  spellScores = new Array(SPELL_ITEMS.length).fill(false);
+
+  SPELL_ITEMS.forEach(function(item, i){
+    var card = document.createElement('div');
+    card.className = 'spell-card';
+
+    var num = document.createElement('div');
+    num.className = 'spell-num';
+    num.textContent = (i+1) + '.';
+
+    var hint = document.createElement('div');
+    hint.className = 'spell-hint';
+    var ph = document.createElement('div');
+    ph.className = 'phonetic';
+    ph.textContent = item.ph;
+    var zh = document.createElement('div');
+    zh.className = 'zh-hint';
+    zh.textContent = item.zh;
+    hint.appendChild(ph);
+    hint.appendChild(zh);
+
+    var inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'spell-input';
+    inp.id = 'spell_' + i;
+    inp.placeholder = 'Type here...';
+
+    var ansEl = document.createElement('span');
+    ansEl.className = 'spell-ans';
+    ansEl.id = 'spell-ans-' + i;
+
+    card.appendChild(num);
+    card.appendChild(hint);
+    card.appendChild(inp);
+    card.appendChild(ansEl);
+    cont.appendChild(card);
+  });
+
+  document.getElementById('spell-check-all').addEventListener('click', function(){
+    var correct = 0;
+    SPELL_ITEMS.forEach(function(item, i){
+      var inp = document.getElementById('spell_'+i);
+      var ansEl = document.getElementById('spell-ans-'+i);
+      var ok = (norm(inp.value) === norm(item.ans));
+      inp.classList.toggle('correct', ok);
+      inp.classList.toggle('wrong', !ok);
+      spellScores[i] = ok;
+      if(ok){ correct++; ansEl.textContent = ''; }
+      else { ansEl.textContent = '\u2192 ' + item.ans; }
+    });
+  });
+
+  document.getElementById('spell-reset').addEventListener('click', function(){
+    SPELL_ITEMS.forEach(function(item, i){
+      var inp = document.getElementById('spell_'+i);
+      var ansEl = document.getElementById('spell-ans-'+i);
+      inp.value = ''; inp.classList.remove('correct','wrong');
+      ansEl.textContent = '';
+      spellScores[i] = false;
+    });
+  });
+})();
+
+// ── TAB 4: SYNONYM MATCHING ───────────────────────────────────────────────────
+(function(){
+  var leftEl = document.getElementById('match-left');
+  var rightEl = document.getElementById('match-right');
+  var svg = document.getElementById('match-svg');
+  var connections = {};
+  var selectedWord = null;
+
+  MATCH_WORDS.forEach(function(w){
+    var item = document.createElement('div');
+    item.className = 'match-item';
+    item.id = 'ml_' + makeId(w);
+    item.textContent = w;
+    item.addEventListener('click', function(){
+      if(item.classList.contains('matched-correct')) return;
+      if(selectedWord === w){
+        item.classList.remove('selected');
+        selectedWord = null;
+        return;
+      }
+      document.querySelectorAll('#match-left .match-item').forEach(function(el){ el.classList.remove('selected'); });
+      selectedWord = w;
+      item.classList.add('selected');
+    });
+    leftEl.appendChild(item);
+  });
+
+  MATCH_SYNS_DISPLAY.forEach(function(s){
+    var item = document.createElement('div');
+    item.className = 'match-item';
+    item.id = 'mr_' + makeId(s);
+    item.textContent = s;
+    item.addEventListener('click', function(){
+      if(!selectedWord) return;
+      if(item.classList.contains('matched-correct')) return;
+      connections[selectedWord] = s;
+      document.getElementById('ml_' + makeId(selectedWord)).classList.remove('selected');
+      selectedWord = null;
+      drawLines(false);
+    });
+    rightEl.appendChild(item);
+  });
+
+  function resizeSvg(){
+    var cont = document.getElementById('match-container');
+    var h = cont.offsetHeight;
+    var w = cont.offsetWidth;
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    svg.style.width = w + 'px';
+    svg.style.height = h + 'px';
+  }
+  window.resizeSvg = resizeSvg;
+
+  function drawLines(checked){
+    resizeSvg();
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    var cont = document.getElementById('match-container');
+    var cr = cont.getBoundingClientRect();
+
+    for(var word in connections){
+      var syn = connections[word];
+      var leftItem = document.getElementById('ml_' + makeId(word));
+      var rightItem = document.getElementById('mr_' + makeId(syn));
+      if(!leftItem || !rightItem) continue;
+      var lr = leftItem.getBoundingClientRect();
+      var rr = rightItem.getBoundingClientRect();
+      var x1 = lr.right - cr.left;
+      var y1 = lr.top - cr.top + lr.height/2;
+      var x2 = rr.left - cr.left;
+      var y2 = rr.top - cr.top + rr.height/2;
+
+      var color = '#94a3b8';
+      if(checked){
+        var idx = MATCH_WORDS.indexOf(word);
+        var correct = (idx>=0 && MATCH_SYNS_ORD[idx] === syn);
+        color = correct ? '#16a34a' : '#dc2626';
+      }
+      var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('stroke', color); line.setAttribute('stroke-width','2.5');
+      line.setAttribute('stroke-linecap','round');
+      svg.appendChild(line);
+    }
+  }
+
+  document.getElementById('match-check').addEventListener('click', function(){
+    matchScore = 0;
+    MATCH_WORDS.forEach(function(w){
+      var idx = MATCH_WORDS.indexOf(w);
+      var correct = (connections[w] === MATCH_SYNS_ORD[idx]);
+      var leftItem = document.getElementById('ml_'+makeId(w));
+      var rightItem = connections[w] ? document.getElementById('mr_'+makeId(connections[w])) : null;
+      leftItem.classList.remove('selected','matched-correct','matched-wrong');
+      leftItem.classList.add(correct ? 'matched-correct' : 'matched-wrong');
+      if(rightItem){
+        rightItem.classList.remove('matched-correct','matched-wrong');
+        rightItem.classList.add(correct ? 'matched-correct' : 'matched-wrong');
+      }
+      if(correct) matchScore++;
+    });
+    drawLines(true);
+  });
+
+  document.getElementById('match-reset').addEventListener('click', function(){
+    connections = {};
+    selectedWord = null;
+    matchScore = 0;
+    MATCH_WORDS.forEach(function(w){
+      var el = document.getElementById('ml_'+makeId(w));
+      el.classList.remove('selected','matched-correct','matched-wrong');
+    });
+    MATCH_SYNS_DISPLAY.forEach(function(s){
+      var el = document.getElementById('mr_'+makeId(s));
+      el.classList.remove('selected','matched-correct','matched-wrong');
+    });
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+  });
+})();
+
+// ── TAB 5: SCORE SUMMARY ─────────────────────────────────────────────────────
+function renderScores(){
+  var cont = document.getElementById('score-content');
+  cont.innerHTML = '';
+
+  var card = document.createElement('div');
+  card.className = 'score-card';
+
+  var rows = [
+    { label: 'Fill in the Blank', correct: fillScores.reduce(function(a,b){return a+b;},0), total: 24 },
+    { label: 'Sentence Reconstruction', correct: recoScores.filter(Boolean).length, total: 5 },
+    { label: 'Spelling', correct: spellScores.filter(Boolean).length, total: 10 },
+    { label: 'Synonym Matching', correct: matchScore, total: 10 }
+  ];
+
+  rows.forEach(function(row){
+    var el = document.createElement('div');
+    el.className = 'score-row';
+    var lbl = document.createElement('div');
+    lbl.className = 'score-label';
+    lbl.textContent = row.label;
+    var barWrap = document.createElement('div');
+    barWrap.className = 'score-bar-wrap';
+    var bar = document.createElement('div');
+    bar.className = 'score-bar';
+    bar.style.width = (row.total>0 ? Math.round(row.correct/row.total*100) : 0) + '%';
+    barWrap.appendChild(bar);
+    var val = document.createElement('div');
+    val.className = 'score-val';
+    val.textContent = row.correct + ' / ' + row.total;
+    el.appendChild(lbl); el.appendChild(barWrap); el.appendChild(val);
+    card.appendChild(el);
+  });
+  cont.appendChild(card);
+
+  var totalCorrect = rows.reduce(function(a,r){return a+r.correct;},0);
+  var totalItems = rows.reduce(function(a,r){return a+r.total;},0);
+  var pct = totalItems>0 ? Math.round(totalCorrect/totalItems*100) : 0;
+
+  var total = document.createElement('div');
+  total.className = 'total-row';
+  var tlbl = document.createElement('div');
+  tlbl.className = 'total-label';
+  tlbl.textContent = 'Total Score';
+  var tval = document.createElement('div');
+  tval.className = 'total-val';
+  tval.textContent = totalCorrect + ' / ' + totalItems + '  (' + pct + '%)';
+  total.appendChild(tlbl);
+  total.appendChild(tval);
+  cont.appendChild(total);
+}
+renderScores();
+
+document.getElementById('reset-all').addEventListener('click', function(){
+  if(!confirm('Reset all exercises? This cannot be undone.')) return;
+  fillScores = [0,0,0,0,0,0];
+  recoScores = [false,false,false,false,false];
+  spellScores = new Array(SPELL_ITEMS.length).fill(false);
+  matchScore = 0;
+  // Reset fill
+  FILL_GROUPS.forEach(function(grp,gi){
+    grp.items.forEach(function(item,si){
+      var inp = document.getElementById('fill_'+gi+'_'+si);
+      if(inp){ inp.value=''; inp.classList.remove('correct','wrong'); }
+    });
+    var sc = document.getElementById('fill-score-'+gi);
+    if(sc) sc.textContent='';
+  });
+  // Reset reco
+  RECO_ITEMS.forEach(function(item,ri){
+    var pool = document.getElementById('pool_'+ri);
+    var zone = document.getElementById('zone_'+ri);
+    if(pool&&zone){
+      Array.from(zone.querySelectorAll('.word-tile')).forEach(function(t){
+        t.dataset.src='pool'; pool.appendChild(t);
+      });
+      var fb = document.getElementById('reco-fb-'+ri);
+      if(fb) fb.className='reco-feedback';
+    }
+  });
+  // Reset spell
+  SPELL_ITEMS.forEach(function(item,i){
+    var inp = document.getElementById('spell_'+i);
+    var ans = document.getElementById('spell-ans-'+i);
+    if(inp){ inp.value=''; inp.classList.remove('correct','wrong'); }
+    if(ans) ans.textContent='';
+  });
+  renderScores();
+  switchTab(5);
+});
+
+window.addEventListener('resize', function(){
+  if(document.getElementById('panel4').classList.contains('active')) resizeSvg();
+});
+</script>
+</body>
+</html>
